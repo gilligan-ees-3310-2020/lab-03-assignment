@@ -15,7 +15,7 @@ output:
 ---
 ```{r setup, include=FALSE}
 knitr::knit_hooks$set(inline = function(x) { knitr:::format_sci(x, 'md')})
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache=TRUE)
 
 # This section loads necessary R libraries and sources scripts that define 
 # useful functions format_md.
@@ -656,7 +656,7 @@ a) Run the MODTRAN model in using the "Tropical" atmosphere, without clouds,
   
 b) Use the outgoing heat flux at the top of the atmosphere to calcuate the
    skin temperature (use the equation 
-   $I_{\text{out}} = \varepsilon \sigma T_{\text{skin}}^4)$).
+   $I_{\text{out}} = \varepsilon \sigma T_{\text{skin}}^4$).
    What is the skin temperature, and how does it compare to the ground 
    temperature and the temperature at the tropopause, as reported by the 
    MODTRAN model?

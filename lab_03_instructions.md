@@ -765,7 +765,7 @@ the top of the atmosphere.
 
 2)  Use the outgoing heat flux at the top of the atmosphere to calcuate
     the skin temperature (use the equation
-    \(I_{\text{out}} = \varepsilon \sigma T_{\text{skin}}^4)\)). What is
+    \(I_{\text{out}} = \varepsilon \sigma T_{\text{skin}}^4\)). What is
     the skin temperature, and how does it compare to the ground
     temperature and the temperature at the tropopause, as reported by
     the MODTRAN model?
