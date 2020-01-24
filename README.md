@@ -12,8 +12,8 @@ use in procesing and graphing data for this lab.)
 This file also has the exercises you will do for this lab.
 
 This repository includes both printable instructions in PDF format
-([`Lab_03_instructions.pdf`](Lab_03_instructions.pdf)) and a version that you can 
-read online on GitHub ([`Lab_03_instructions.md`](Lab_03_instructions.md)).
+([`lab_03_instructions.pdf`](lab_03_instructions.pdf)) and a version that you can 
+read online on GitHub ([`lab_03_instructions.md`](lab_03_instructions.md)).
 
 These instructions are also identical to the ones posted on the course website
 at <https://ees3310.jgilligan.org/lab_docs/lab_03_instructions/>.
@@ -28,7 +28,7 @@ work.
 * Clone a local copy of the file repository from github to your
   own computer.
 * In your local repository, answer the exercises in the template
-  `Lab_03_data_exercises.Rmd`.
+  `lab_03_exercises.Rmd`.
 * When you are done, knit your `.Rmd` files into PDF files.
 * Use git to commit your changes (including the edits to the `.Rmd` files
   and the new PDF files) to your local git repository.
@@ -45,7 +45,7 @@ knit correctly.
 
 **Remember that to turn in the assignment you need to:**
 
-1. Successfully **knit** `Lab_02_assignment_part_2.Rmd` into a `.pdf` or 
+1. Successfully **knit** `lab_03_exercises.Rmd` into a `.pdf` or 
    Word (`.docx`) file. 
 2. **Commit** your `.Rmd` (rmarkdown) document **and** the `.pdf` or `.docx` 
    file to your local git repository on your computer.
