@@ -12,8 +12,8 @@ use in procesing and graphing data for this lab.)
 This file also has the exercises you will do for this lab.
 
 This repository includes both printable instructions in PDF format
-([`Lab_03_assignment.pdf`](Lab_03_assignment.pdf)) and a version that you can 
-read online on GitHub ([`Lab_03_assignment.md`](Lab_03_assignment.md)).
+([`Lab_03_instructions.pdf`](Lab_03_instructions.pdf)) and a version that you can 
+read online on GitHub ([`Lab_03_instructions.md`](Lab_03_instructions.md)).
 
 These instructions are also identical to the ones posted on the course website
 at <https://ees3310.jgilligan.org/lab_docs/lab_03_instructions/>.
