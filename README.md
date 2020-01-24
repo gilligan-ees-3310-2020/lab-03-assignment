@@ -11,6 +11,13 @@ use in procesing and graphing data for this lab.)
 
 This file also has the exercises you will do for this lab.
 
+This repository includes both printed instructions 
+(`Lab_02_assignment_part_2.pdf`) and a version that you can read online on
+GitHub ([`Lab_02_assignment_part_2.md`](Lab_02_assignment_part_2.md)).
+
+These instructions are also identical to the ones posted on the course website
+at <https://ees3310.jgilligan.org/lab_docs/lab_03_instructions/>.
+
 2. When you come to lab, you will work through the exercises, and you will
 edit the file `Lab_03_exercises.Rmd` to write your answers and show your
 work.
@@ -27,11 +34,29 @@ work.
   and the new PDF files) to your local git repository.
 * Push the changes from your local git repository to github.
 
-    The last changes that you push before the due date 
-    (9:00 AM on Monday Sept. 17) will be graded.
+  The last changes that you push before the due date 
+  (9:00 AM on Monday Feb. 3) will be graded.
 
-I advise using git to commit changes frequently as you work and push those commits
-to github.
+I advise using git to commit changes frequently as you work and push those 
+commits to GitHub.
 
 I also advise knitting your answers frequently to make sure that they 
 knit correctly.
+
+**Remember that to turn in the assignment you need to:**
+
+1. Successfully **knit** `Lab_02_assignment_part_2.Rmd` into a `.pdf` or 
+   Word (`.docx`) file. 
+2. **Commit** your `.Rmd` (rmarkdown) document **and** the `.pdf` or `.docx` 
+   file to your local git repository on your computer.
+3. **Push** your local repository to GitHub, so Ms. Best and Prof. Gilligan 
+   can see your final results.
+
+**The last version of your work that you have pushed by the deadline is what 
+will be graded.**
+You will lose a lot of points if there is not a `.pdf` or `.docx` file with 
+results.
+
+As long as there is a file with results, we will be generous with partial 
+credit.
+

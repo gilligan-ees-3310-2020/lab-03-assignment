@@ -1,5 +1,4 @@
 library(tidyverse)
-library(stringr)
 
 format_engr = function(x, digits = 6) {
   x_sci <- formatC(x, digits = digits, format = "e", flag = "#",

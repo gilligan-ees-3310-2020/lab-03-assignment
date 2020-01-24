@@ -2,10 +2,18 @@
 title: 'EES 3310/5310 Lab #3'
 subtitle: "Exercises with the MODTRAN Model"
 author: "put your name here"
-date: 'Lab: Mon. Sept. 10. Due: Mon. Sept. 17.'
+date: 'Lab: Mon. Jan. 27. Due: Mon. Feb. 3'
+fontfamily: "mathptmx"
+fontsize: "12pt"
 output:
-  pdf_document: default
-  html_document: default
+  html_document: 
+    toc: true
+  word_document:
+    toc: true
+  pdf_document:
+    toc: true
+  github_document:
+    toc: true
 ---
 ```{r setup, include=FALSE}
 knitr::knit_hooks$set(inline = function(x) { knitr:::format_sci(x, 'md')})
@@ -18,7 +26,7 @@ data_dir = "_data"
 script_dir = "_scripts"
 
 library(pacman)
-p_load(zoo, xml2, tidyverse, stringr)
+p_load(zoo, xml2, tidyverse)
 
 theme_set(theme_bw(base_size = 15))
 
@@ -34,9 +42,9 @@ source(file.path(script_dir, 'modtran.R'), chdir = T)
 Methane has a current concentration of 1.7 ppm in the atmosphere and
 is doubling at a faster rate than CO~2~.
 
-a) Would an additional 10 ppm of methane in the atmosphere have a larger or smaller
-  impact on the outgoing IR flux than an additional 10 ppm of CO~2~ at current
-  concentrations?
+a) Would an additional 10 ppm of methane in the atmosphere have a larger or 
+   smaller impact on the outgoing IR flux than an additional 10 ppm of CO~2~ 
+   at current concentrations?
 
 ```{r ex_4_1_a, include=TRUE, message=FALSE}
 # Put your R code here
@@ -52,8 +60,8 @@ Suggestion:
 * Run MODTRAN with an extra 10 ppm of CO~2~ and the normal amount of methane.
 * Run MODTRAN with the normal amount of CO~2~ and an extra 10 ppm of methane.
 
-What would you look at from the three runs to figure out whether 10 ppm of methane
-or 10 ppm of CO~2~ had the greater effect?
+What would you look at from the three runs to figure out whether 10 ppm of 
+methane or 10 ppm of CO~2~ had the greater effect?
 
 
 b) Where in the spectrum does methane absorb? What concentration does it take to
@@ -83,10 +91,10 @@ include any data, plots, etc. that you need in order to explain how
 you came up with your answer.
 
 
-d) What is the "equivalent CO~2~" of doubling atmospheric methane? That is to say,
-   how many ppm of CO~2~ would lead to the same change in outgoing IR radiation
-   energy flux as doubling methane? What is the ratio of ppm CO~2~ change to 
-   ppm methane change?
+d) What is the "equivalent CO~2~" of doubling atmospheric methane? That is to 
+   say, how many ppm of CO~2~ would lead to the same change in outgoing IR 
+   radiation energy flux as doubling methane? What is the ratio of ppm CO~2~ 
+   change to ppm methane change?
 
 ```{r ex_4_1_d, include=TRUE, message=FALSE}
 # Put your R code here
@@ -102,8 +110,8 @@ you came up with your answer.
 a) Is the direct effect of increasing CO~2~ on the energy output at the top of
    the atmosphere larger in high latitudes or in the tropics?
 
-    For each atmosphere, first record $I_{\text{out}}$ with CO~2~ at 400 ppm
-    and then record the change when you increase CO~2~ to 800 ppm.
+   For each atmosphere, first record $I_{\text{out}}$ with CO~2~ at 400 ppm
+   and then record the change when you increase CO~2~ to 800 ppm.
 
 ```{r ex_4_2_a, include=TRUE, message=FALSE}
 # Put your R code here
@@ -118,8 +126,8 @@ b) Set pCO~2~ to an absurdly high value of 10,000 ppm. You will see a spike
    in the CO~2~ absorption band. What temperature is this light coming from? 
    Where in the atmosphere do you think this comes from?
 
-    Now turn on clouds and run the model again. Explain what you see.
-    Why are night-time temperatures warmer when there are clouds?
+   Now turn on clouds and run the model again. Explain what you see.
+   Why are night-time temperatures warmer when there are clouds?
 
 ```{r ex_4_2_b, include=TRUE, message=FALSE}
 # Put your R code here
@@ -166,23 +174,23 @@ you came up with your answer.
 
 c) Now see this effect in another way. 
 
-    * Starting from the default base case, record the total outgoing 
-      IR flux. 
+   * Starting from the default base case, record the total outgoing 
+     IR flux. 
 
-    * Now double pCO2. The temperature in the model stays the
-      same (that's how the model is written), but the outgoing IR flux
-      goes down.
+   * Now double pCO2. The temperature in the model stays the
+     same (that's how the model is written), but the outgoing IR flux
+     goes down.
 
-    * Using constant water vapor pressure, adjust the temperature offset
-      until you get the original IR flux back again. Record the change in
-      temperature
+   * Using constant water vapor pressure, adjust the temperature offset
+     until you get the original IR flux back again. Record the change in
+     temperature
     
-    * Now repeat the exercise, but holding the relative humidity fixed
-      instead of the water vapor pressure.
+   * Now repeat the exercise, but holding the relative humidity fixed
+     instead of the water vapor pressure.
     
-    * The ratio of the warming when you hold relative humidity fixed
-      to the warming when you hold water vapor pressure fixed is the 
-      feedback factor for water vapor. What is it?
+   * The ratio of the warming when you hold relative humidity fixed
+     to the warming when you hold water vapor pressure fixed is the 
+     feedback factor for water vapor. What is it?
 
 ```{r ex_4_3_c, include=TRUE, message=FALSE}
 # Put your R code here
@@ -196,18 +204,20 @@ you came up with your answer.
 
 ## Exercise 5.2: Skin Height
 
-a) Run the MODTRAN model in using the "Tropical" atmosphere, without clouds, and with
-   present-day pCO~2~ (400 ppm). Use the ground temperature reported by the model to calculate
-   $\varepsilon \sigma T_{\text{ground}}^4$, the heat flux emitted by the ground.
+a) Run the MODTRAN model in using the "Tropical" atmosphere, without clouds, 
+   and with present-day pCO~2~ (400 ppm). Use the ground temperature reported 
+   by the model to calculate
+   $\varepsilon \sigma T_{\text{ground}}^4$, 
+   the heat flux emitted by the ground.
    Assume $\varepsilon = 1$, and I have already provided the value of the 
    Stefan-Boltzmann constant $\sigma$, as the R variable `sigma_sb`,
    which equals `r format_md(sigma_sb, digits = 3, format = "scientific")`.
    (I defined it in the script "utils.R", which I loaded in the "setup" chunk
    in the RMarkdown document).
 
-    Next, look at the outgoing heat flux at the top of the atmosphere (70 km) 
-    reported by the MODTRAN model. Is it greater or less than the heat flux
-    that you calculated was emitted by the ground?
+   Next, look at the outgoing heat flux at the top of the atmosphere (70 km) 
+   reported by the MODTRAN model. Is it greater or less than the heat flux
+   that you calculated was emitted by the ground?
 
 ```{r ex_5_2_a, include=TRUE, message=FALSE}
 # Put your R code here
@@ -224,9 +234,9 @@ b) Use the outgoing heat flux at the top of the atmosphere to calcuate the
    temperature and the temperature at the tropopause, as reported by the 
    MODTRAN model?
    
-    Assuming an environmental lapse rate of 6K/km, and using the 
-    skin temperature that you calculated above, and the ground temperature
-    from the model, what altitude would you expect the skin height to be?
+   Assuming an environmental lapse rate of 6K/km, and using the 
+   skin temperature that you calculated above, and the ground temperature
+   from the model, what altitude would you expect the skin height to be?
 
 ```{r ex_5_2_b, include=TRUE, message=FALSE}
 # Put your R code here
@@ -240,7 +250,7 @@ c) Double the CO~2~ concentration and run MODTRAN again. Do not adjust the
    ground temperature. Repeat the calculations from (b) of the skin
    temperature and the estimated skin height.
 
-    What is the new skin temperature? What is the new skin height?
+   What is the new skin temperature? What is the new skin height?
 
 ```{r ex_5_2_c, include=TRUE, message=FALSE}
 # Put your R code here
@@ -254,9 +264,9 @@ d) Put the CO~2~ back to today's value, but add cirrus clouds, using the
    "standard cirrus" value for the clouds. Repeat the calculations from (b) of
    the skin temperature and the skin height.
    
-    What is the new skin temperature? What is the new skin height?
-    Did the clouds or the doubled CO~2~ have a greater effect on the
-    skin height?
+   What is the new skin temperature? What is the new skin height?
+   Did the clouds or the doubled CO~2~ have a greater effect on the
+   skin height?
 
 ```{r ex_5_2_d, include=TRUE, message=FALSE}
 # Put your R code here
@@ -265,5 +275,3 @@ d) Put the CO~2~ back to today's value, but add cirrus clouds, using the
 **Answer:** _Put your answer here._ Be sure to show your work and
 include any data, plots, etc. that you need in order to explain how
 you came up with your answer.
-
-

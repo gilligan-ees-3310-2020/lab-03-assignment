@@ -28,9 +28,14 @@
 .Rproj.user
 *.synctex.gz
 *.aux
+*.bak
 *.out
 *.log
 *.blg
 *.toc
 *.lof
 *.lot
+
+# Other miscellaneous files to ignore:
+README.html
+README.pdf
