@@ -344,7 +344,7 @@ for (i in 1:4) {
 This gives us a nice way to run MODTRAN over and over, with many different
 values for the CO~2~ concentration:
 
-```{r modtran_loop, include=TRUE, message=FALSE, warning=FALSE}
+```{r modtran_loop, echo=TRUE, eval=FALSE, message=FALSE, warning=FALSE}
 co2_values = c(0, 200, 400, 600, 800, 1000, 1200)
 for (co2 in co2_values) {
   filename = str_c("modtran_", co2, ".txt")
