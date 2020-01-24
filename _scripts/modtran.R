@@ -177,7 +177,7 @@ run_modtran <- function(filename = NULL,
   if (! is.null(filename)) {
     write(body, filename)
   }
-
+  Sys.sleep(5)
 
   output <- str_c(body, collapse = "\n") %>% read_modtran(text = .)
   invisible(output)
