@@ -552,8 +552,9 @@ c) Would a doubling of methane have as great an impact on the heat balance as a
    **Suggestion:** 
     
    * Run MODTRAN in its default configuration (400 ppm CO~2~ and 1.7 ppm methane)
-   * Run it again with 10 ppm of extra methane
-   * Run it again with the default methane (1.7 ppm) but 10 ppm extra CO~2~.
+   * Run it again with double the methane concentration.
+   * Run it again with the default methane (1.7 ppm) but double the CO~2~ 
+     concentration.
    * Compare $I_{\text{out}}$ for the three runs.
 
 d) What is the "equivalent CO~2~" of doubling atmospheric methane? That is to say,
@@ -613,6 +614,11 @@ b) More water can evaporate into warm air than into cool air. Change the
    in outgoing IR energy flux for a 5&deg;C temperature increase.
    Is it higher or lower? Does water vapor make the Earth more sensitive to
    CO~2~ increases or less sensitive?
+   
+   **Note:** By default, the MODTRAM model holds water vapor pressure constant,
+   but you can set it to hold relative humidity constant instead with the
+   option `h2o_fixed = "relative humidity"`, like this:
+   `run_modtran(file_name, delta_t = 5, h2o_fixed = "relative humidity")`.
 
 c) Now see this effect in another way. 
 
