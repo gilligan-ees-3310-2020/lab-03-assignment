@@ -177,14 +177,15 @@ run_modtran <- function(filename = NULL,
   if (! is.null(filename)) {
     write(body, filename)
   }
-  Sys.sleep(5)
+  Sys.sleep(1)
+
 
   output <- str_c(body, collapse = "\n") %>% read_modtran(text = .)
   invisible(output)
 }
 
 
-read_modtran_profile <- function(filename = NULL, text = NULL) {
+read_modtran_profile <- function(text = NULL, filename = NULL) {
   if (! is.null(filename) && ! is.na(filename)) {
     if (isTRUE(any(str_detect(filename, "\n"))) || length(filename) > 1) {
       text = filename
@@ -289,8 +290,8 @@ read_modtran <- function(filename = NULL, text = NULL, scale_factor = 3.14E+4) {
                  atmosphere = atmos_spec))
 }
 
-plot_modtran <- function(filename = NULL, text = NULL,
-                         modtran_data = NULL,
+plot_modtran <- function(modtran_data = NULL,
+                         text = NULL, filename = NULL,
                          descr = NULL, i_out_ref = NA,
                          last_i_out = NA, delta_t = NA,
                          tmin=220, tmax = 300,

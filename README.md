@@ -4,7 +4,7 @@
 
 There are two files for this lab.
 
-1. Start by reading `Lab_03_instructions.pdf`, which describes things you need
+1. Start by reading `lab_03-instructions.pdf`, which describes things you need
 to know for this lab (about the R functions for working with the MODTRAN model
 and the data that it produces, as well as some useful R functions that we will
 use in procesing and graphing data for this lab.)
@@ -12,14 +12,14 @@ use in procesing and graphing data for this lab.)
 This file also has the exercises you will do for this lab.
 
 This repository includes both printable instructions in PDF format
-([`lab_03_instructions.pdf`](lab_03_instructions.pdf)) and a version that you can 
-read online on GitHub ([`lab_03_instructions.md`](lab_03_instructions.md)).
+([`lab-03-instructions.pdf`](lab-03-instructions.pdf)) and a version that you can 
+read online on GitHub ([`lab-03-instructions.md`](lab-03-instructions.md)).
 
 These instructions are also identical to the ones posted on the course website
-at <https://ees3310.jgilligan.org/lab_docs/lab_03_instructions/>.
+at <https://ees3310.jgilligan.org/lab_docs/lab-03-instructions/>.
 
 2. When you come to lab, you will work through the exercises, and you will
-edit the file `Lab_03_exercises.Rmd` to write your answers and show your
+edit the file `lab-03-exercises.Rmd` to write your answers and show your
 work.
 
 ## Instructions:
@@ -28,7 +28,7 @@ work.
 * Clone a local copy of the file repository from github to your
   own computer.
 * In your local repository, answer the exercises in the template
-  `lab_03_exercises.Rmd`.
+  `lab-03-exercises.Rmd`.
 * When you are done, knit your `.Rmd` files into PDF files.
 * Use git to commit your changes (including the edits to the `.Rmd` files
   and the new PDF files) to your local git repository.
@@ -45,7 +45,7 @@ knit correctly.
 
 **Remember that to turn in the assignment you need to:**
 
-1. Successfully **knit** `lab_03_exercises.Rmd` into a `.pdf` or 
+1. Successfully **knit** `lab-03-exercises.Rmd` into a `.pdf` or 
    Word (`.docx`) file. 
 2. **Commit** your `.Rmd` (rmarkdown) document **and** the `.pdf` or `.docx` 
    file to your local git repository on your computer.

@@ -3,7 +3,6 @@ title: 'EES 3310/5310 Lab #3'
 subtitle: "Exercises with the MODTRAN Model"
 author: "put your name here"
 date: 'Lab: Mon. Jan. 27. Due: Mon. Feb. 3'
-fontfamily: "mathptmx"
 fontsize: "12pt"
 output:
   html_document: 
@@ -12,12 +11,16 @@ output:
     toc: true
   pdf_document:
     toc: true
+    includes:
+       in_header: ees3310.sty
   github_document:
     toc: true
 ---
 ```{r setup, include=FALSE}
 knitr::knit_hooks$set(inline = function(x) { knitr:::format_sci(x, 'md')})
 knitr::opts_chunk$set(echo = TRUE)
+
+options(dplyr.summarise.inform = FALSE)
 
 # This section loads necessary R libraries and sources scripts that define 
 # useful functions format_md.
@@ -26,7 +29,7 @@ data_dir = "_data"
 script_dir = "_scripts"
 
 library(pacman)
-p_load(zoo, xml2, tidyverse)
+p_load(xml2, tidyverse, slider)
 
 theme_set(theme_bw(base_size = 15))
 
@@ -36,6 +39,13 @@ source(file.path(script_dir, 'modtran.R'), chdir = T)
 
 ```
 # Chapter 4 Exercises
+
+Fill in R code for the exercises 
+(I have put the comment `# TODO` in all of the code chunks where you need to 
+do this)
+and then fill in the answers where I have marked **Answer:**. 
+Be sure to write explanations of your answer and don't just put numbers with 
+no text.
 
 ## Exercise 4.1: Methane
 
@@ -47,12 +57,12 @@ a) Would an additional 10 ppm of methane in the atmosphere have a larger or
    at current concentrations?
 
 ```{r ex_4_1_a, include=TRUE, message=FALSE}
+# TODO
 # Put your R code here
 ```
 
-**Answer:** _Put your answer here._ Be sure to show your work and
-include any data, plots, etc. that you need in order to explain how
-you came up with your answer.
+**Answer:** _Put your answer here._ Be sure to explain your reasoning and 
+show data, plots, etc. to explain how you came up with your answer.
 
 Suggestion:
 
@@ -68,9 +78,40 @@ b) Where in the spectrum does methane absorb? What concentration does it take to
   begin to saturate the absorption in this band? Explain what you are looking 
   at to judge when the gas is saturated.
   
-    **Note:** See the suggestions in the instructions for this lab.
+**Hints**:  
+I recommend setting all the greenhouse gases to zero, and run MODTRAN.
+Then run MODTRAN for several values of methane, starting at 1 ppm and 
+doubling the concentration until you get to around 128 ppm.
+You can do this using a `for` loop, following the examples from the 
+lab instructions.
+
+To set all the greenhouse gases to zero, you would call 
+`run_modtran(co2_ppm = 0, ch4_ppm = 0, trop_o3_ppb = 0, strat_o3_scale = 0,
+h2o_scale = 0, freon_scale = 0)`
+
+The spectrum of methane is complicated so it doesn't saturate all at once.
+Use `plot_modtran` to plot the spectrum for each concentration and describe 
+what you see and where you think methane begins to saturate and why.
+
+By default, `plot_modtran` gives a plot a title that indicates the CO~2~
+concentration. Here, CO~2~ doesn't change and we're interested in the CH~4~
+concentration, so you can use the `descr` argument to `plot_modtran` to
+give the plots different titles. See the example below.
+
+Remember that if you want to make several plots using a `for` loop, you need to 
+assign the result from `plot_modtran` or `ggplot` to a variable and then
+use the `plot` or `print` function.
+``` r
+for (ch4 in ch4_list) {
+  mod_data = run_modtran(co2_ppm = 0, ch4_ppm = ch4, trop_o3_ppb = 0,
+                         strat_o3_scale = 0, h2o_scale = 0, freon_scale = 0)
+  p = plot_modtran(mod_data, descr = str_c(ch4, " ppm methane"))
+  plot(p) # you could also say print(p) here.
+}
+```
 
 ```{r ex_4_1_b, include=TRUE, message=FALSE}
+# TODO
 # Put your R code here
 ```
 
@@ -91,6 +132,7 @@ c) Would a doubling of methane have as great an impact on the heat balance as a
    * Compare $I_{\text{out}}$ for the three runs.
 
 ```{r ex_4_1_c, include=TRUE, message=FALSE}
+# TODO
 # Put your R code here
 ```
 
@@ -105,6 +147,7 @@ d) What is the "equivalent CO~2~" of doubling atmospheric methane? That is to
    change to ppm methane change?
 
 ```{r ex_4_1_d, include=TRUE, message=FALSE}
+# TODO
 # Put your R code here
 ```
 
@@ -118,10 +161,16 @@ you came up with your answer.
 a) Is the direct effect of increasing CO~2~ on the energy output at the top of
    the atmosphere larger in high latitudes or in the tropics?
 
-   For each atmosphere, first record $I_{\text{out}}$ with CO~2~ at 400 ppm
-   and then record the change when you increase CO~2~ to 800 ppm.
+   **Hint:**
+   Run MODTRAN with the atmosphere set to `tropical`, `midlatitude summer`,
+   and `subarctic summer`, and for each atmosphere, at 400 ppm and 800 ppm CO~2~. 
+   For each atmosphere, calculate the difference between I~out~ at 400 and 800
+   ppm CO~2~ and determine how the effect of doubling CO~2~ varies as you go
+   from  tropical latitudes to subarctic ones.
+
 
 ```{r ex_4_2_a, include=TRUE, message=FALSE}
+# TODO
 # Put your R code here
 ```
 
@@ -137,7 +186,21 @@ b) Set pCO~2~ to an absurdly high value of 10,000 ppm. You will see a spike
    Now turn on clouds and run the model again. Explain what you see.
    Why are night-time temperatures warmer when there are clouds?
 
+   **Hint:** MODTRAN simulates the upward directed, outgoing longwave radiation 
+   as seen by a sensor looking down from some height. 
+   For the first part of this exercise, start with the sensor at its
+   default altitude of 70 km (you set this with the `altitude_km` argument to
+   `run_modtran`), and successively lower it by 10 km at a time until
+   you get to 10 km. 
+   What happens to the spike as you lower the sensor? What does this say about
+   what part of the atmosphere is responsible for the spike in the middle of the 
+   CO~2~ absorption at very high values of CO~2~?
+   
+   For the second part of this exercise, try using "altostratus" clouds.
+
+
 ```{r ex_4_2_b, include=TRUE, message=FALSE}
+# TODO
 # Put your R code here
 ```
 
@@ -158,6 +221,7 @@ a) How much extra outgoing IR would you get by raising the temperature of the
    shape of the outgoing IR spectrum and why?
 
 ```{r ex_4_3_a, include=TRUE, message=FALSE}
+# TODO
 # Put your R code here
 ```
 
@@ -178,6 +242,7 @@ b) More water can evaporate into warm air than into cool air. Change the
    `run_modtran(file_name, delta_t = 5, h2o_fixed = "relative humidity")`.
 
 ```{r ex_4_3_b, include=TRUE, message=FALSE}
+# TODO
 # Put your R code here
 ```
 
@@ -206,6 +271,7 @@ c) Now see this effect in another way.
      feedback factor for water vapor. What is it?
 
 ```{r ex_4_3_c, include=TRUE, message=FALSE}
+# TODO
 # Put your R code here
 ```
 
@@ -217,13 +283,13 @@ you came up with your answer.
 
 ## Exercise 5.2: Skin Height
 
-a) Run the MODTRAN model in using the "Tropical" atmosphere, without clouds, 
+a) Run the MODTRAN model using the "tropical" atmosphere, without clouds, 
    and with present-day pCO~2~ (400 ppm). Use the ground temperature reported 
    by the model to calculate
-   $\varepsilon \sigma T_{\text{ground}}^4$, 
+   &epsilon; &sigma; T~ground~^4^,
    the heat flux emitted by the ground.
-   Assume $\varepsilon = 1$, and I have already provided the value of the 
-   Stefan-Boltzmann constant $\sigma$, as the R variable `sigma_sb`,
+   Assume &epsilon; = 1, and I have already provided the value of the 
+   Stefan-Boltzmann constant &sigma;, as the R variable `sigma_sb`,
    which equals `r format_md(sigma_sb, digits = 3, format = "scientific")`.
    (I defined it in the script "utils.R", which I loaded in the "setup" chunk
    in the RMarkdown document).
@@ -233,6 +299,7 @@ a) Run the MODTRAN model in using the "Tropical" atmosphere, without clouds,
    that you calculated was emitted by the ground?
 
 ```{r ex_5_2_a, include=TRUE, message=FALSE}
+# TODO
 # Put your R code here
 ```
 
@@ -252,6 +319,7 @@ b) Use the outgoing heat flux at the top of the atmosphere to calcuate the
    from the model, what altitude would you expect the skin height to be?
 
 ```{r ex_5_2_b, include=TRUE, message=FALSE}
+# TODO
 # Put your R code here
 ```
 
@@ -266,6 +334,7 @@ c) Double the CO~2~ concentration and run MODTRAN again. Do not adjust the
    What is the new skin temperature? What is the new skin height?
 
 ```{r ex_5_2_c, include=TRUE, message=FALSE}
+# TODO
 # Put your R code here
 ```
 
@@ -282,6 +351,7 @@ d) Put the CO~2~ back to today's value, but add cirrus clouds, using the
    skin height?
 
 ```{r ex_5_2_d, include=TRUE, message=FALSE}
+# TODO
 # Put your R code here
 ```
 

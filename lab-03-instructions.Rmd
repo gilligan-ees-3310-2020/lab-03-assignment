@@ -1,9 +1,8 @@
 ---
 title: 'Instructions for EES 3310/5310 Lab #3'
 author: "Jonathan Gilligan"
-date: 'Lab: Mon. Jan. 10. Due: Mon. Feb. 3'
+date: 'Lab: Mon. Feb. 8. Due: Mon. Feb. 15'
 subtitle: Exercises with the MODTRAN Model
-fontfamily: mathptmx
 fontsize: 12pt
 output:
   html_document:
@@ -12,10 +11,14 @@ output:
     toc: true
   pdf_document: 
     toc: true
+    includes:
+      in_header: ees3310.sty
 ---
 ```{r setup, include=FALSE}
 knitr::knit_hooks$set(inline = function(x) { knitr:::format_sci(x, 'md')})
 knitr::opts_chunk$set(echo = TRUE, cache=TRUE)
+
+options(dplyr.summarise.inform = FALSE)
 
 # This section loads necessary R libraries and sources scripts that define 
 # useful functions format_md.
@@ -24,7 +27,7 @@ data_dir = "_data"
 script_dir = "_scripts"
 
 library(pacman)
-p_load(xml2, tidyverse)
+p_load(knitr, xml2, tidyverse)
 
 theme_set(theme_bw(base_size = 15))
 
@@ -47,16 +50,21 @@ to turn those insights into reproducible research.
 
 ## Using MODTRAN with RMarkdown.
 
-This RMarkdown document includes the line `source("scripts/modtran.R")`,
+This RMarkdown document includes the line `source("_scripts/modtran.R")`,
 which loads a script with the following functions:
   
 * `run_modtran()` allows you to automatically download a file
   with the data from a MODTRAN run. You call it with the following arguments:
   
-  * `filename` is the name of the file to save the data to. I recommend
-    giving it a meaningful name: for instance, a run with 550 ppm CO2 and 3.4
-    ppm methane might be called "`modtran_440_34.txt`". Make up your own file
-    names, but think about how you will tell which is which.
+  * `filename` is an optional name for a file to save the data to. 
+    If you don't specify the `filename`, then `run_modtran` will not save the
+    model output to the disk.
+    I recommend giving it a meaningful name: for instance, a run with 
+    550 ppm CO2 and 3.4 ppm methane might be called "`modtran_440_34.txt`". 
+    Make up your own file names, but think about how you will tell which is 
+    which.
+    I also recommend that you save the files in the `_data` subdirectory to keep
+    your project nicely organized.
 
   * `co2_ppm` is the amount of CO~2~ in parts per million. The default is 400.
 
@@ -146,16 +154,50 @@ which loads a script with the following functions:
   `run_modtran(file.path(data_dir, "modtran_experiment_1.txt"), co2_ppm = 800, delta_t = 1.0, h2o_fixed = "relative humidity")`
   would run with all the default values, except for 800 ppm CO~2~, 
   a temperature offset of 1&deg;C, and holding relative humidity fixed.
-    
+
+  The function **returns a list with 7 elements**:
+  * `spectrum` is a data tibble with the spectral information (wavelength `lambda`,
+    wavenumber `k`, outgoing IR intensity `tk`, and a number of other variables.)
+  * `profile` is the profile of the atmosphere: a tibble with seven columns:
+    * `Z`   is the altitude in km, 
+    * `P`   is the atmospheric pressure, in millibars, and
+    * `T`   is the temperature in Kelvin.
+    * `H2O` is the concentration of water vapor, in parts per million at each
+      altitude.
+    * `O3`  is the concentration of ozone, in parts per million at each
+      altitude.
+    * `CO2` is the concentration of carbon dioxide, in parts per million at each
+      altitude.
+    * `CH4` is the concentration of methane, in parts per million at each
+      altitude.
+  * `co2` is the atmospheric CO~2~ concentration
+  * `ch4` is the atmospheric methane concentration
+  * `i_out` is the intensity of the outgoing IR radiation flux.
+  * `t_ground` is the ground temperature (in Kelvin) used in the model run.
+    (Remember that this is something you set when you run the model.
+    MODTRAN cannot calculate the way ground temperature changes when
+    you change greenhouse gases, clouds, or other characteristics of the
+    atmosphere.)
+  * `t_tropo` is the temperature at the tropopause (in Kelvin).
+  * `h_tropo` is the height of the tropopause (in km).
+  * `alt` is the altitude of the virtual sensor.
+  * `sensor_direction` is the direction of the virtual sensor ("up" or "down").
+
   You can assign the output of `run_modtran()` to a variable like this:
-  `mod_data <- run_modtran("my_modtran_file.txt", co2_ppm = 400)` and then 
+  `mod_data = run_modtran("my_modtran_file.txt", co2_ppm = 400)` and then 
   you can pass the value of `mod_data` to the `plot_modtran()` function, as 
   described below.
 
-* `plot_modtran` reads a MODTRAN output file and generates a plot.
+* `read_modtran(filename)` allows you to read in a MODTRAN output file 
+  (saved to the disk by `run_modtran()`. It returns a list with the 
+  same elements as `run_modtran()`.
+
+* `plot_modtran` generates a plot of the radiative spectrum.
   There are many arguments, and I won't explain them all here, but
   the important ones are:
   
+  * `modtran_data` is the data that would be returned by the `run_modtran()`
+    function. If you want to plot 
   * `filename` is the MODTRAN output file with the data to use for the plot.
   
     You can also provide data directly to `plot_modtran` instead of reading
@@ -184,45 +226,6 @@ which loads a script with the following functions:
 
   * `text_size` allows you to adjust the size of the text used for axis labels
     and the plot title.
-
-* `read_modtran(filename)` allows you to read in a MODTRAN output file and 
-    examine the data. This function returns a list with 7 elements:
-  
-  * `spectrum` is a data tibble with the spectral information (wavelength `lambda`,
-    wavenumber `k`, outgoing IR intensity `tk`, and a number of other variables.)
-
-  * `profile` is the profile of the atmosphere: a tibble with seven columns:
-    * `Z`   is the altitude in km, 
-    * `P`   is the atmospheric pressure, in millibars, and
-    * `T`   is the temperature in Kelvin.
-    * `H2O` is the concentration of water vapor, in parts per million at each
-      altitude.
-    * `O3`  is the concentration of ozone, in parts per million at each
-      altitude.
-    * `CO2` is the concentration of carbon dioxide, in parts per million at each
-      altitude.
-    * `CH4` is the concentration of methane, in parts per million at each
-      altitude.
-
-  * `co2` is the atmospheric CO~2~ concentration
-
-  * `ch4` is the atmospheric methane concentration
-
-  * `i_out` is the intensity of the outgoing IR radiation flux.
-
-  * `t_ground` is the ground temperature (in Kelvin) used in the model run.
-    (Remember that this is something you set when you run the model.
-    MODTRAN cannot calculate the way ground temperature changes when
-    you change greenhouse gases, clouds, or other characteristics of the
-    atmosphere.)
-
-  * `t_tropo` is the temperature at the tropopause (in Kelvin).
-
-  * `h_tropo` is the height of the tropopause (in km).
-
-  * `alt` is the altitude of the virtual sensor.
-
-  * `sensor_direction` is the direction of the virtual sensor ("up" or "down").
 
 ### Converting temperature units    
 
@@ -273,19 +276,20 @@ You see that `r t2_f` minus `r t1_f` is not `r ktof(delta_t_k)`.
   * `sigma_sb` is the Stefan-Boltzmann constant.
 
   * `solar_constant` is the Solar Constant (the intensity of sunlight at the 
-    top of the atmosphere).
+    top of the atmosphere, `r format_md(solar_constant, digits= 3)`).
 
 ## Examples:
 
 ```{r run_modtran_baseline, include=TRUE, message=FALSE, warning=FALSE}
-run_modtran(filename = file.path(data_dir, "modtran_baseline.txt"))
-modtran_baseline = read_modtran(file.path(data_dir, "modtran_baseline.txt"))
+modtran_baseline = run_modtran(filename = 
+                                 file.path(data_dir, "modtran_baseline.txt"))
 ```
 
 You could also write this as 
 
 ```{r run_modtran_baseline_2, include=TRUE, message=FALSE, warning=FALSE}
-modtran_baseline = run_modtran(filename = file.path(data_dir, "modtran_baseline.txt"))
+run_modtran(filename = file.path(data_dir, "modtran_baseline.txt"))
+modtran_baseline = read_modtran(file.path(data_dir, "modtran_baseline.txt"))
 ```
 
 Now you can extract the various values from modtran_baseline:
@@ -301,13 +305,13 @@ and
 $T_{\text{tropopause}} = `r format_md(baseline_t_trop, digits=1, output_format = "latex")`$.
 
 ```{r plot_modtran_baseline, include=TRUE, message=FALSE, warning=FALSE}
-plot_modtran(file.path(data_dir, "modtran_baseline.txt"))
+plot_modtran(modtran_baseline)
 ```
 
 Or you could write
 
 ```{r plot_modtran_baseline_2, include=TRUE, message=FALSE, warning=FALSE}
-plot_modtran(modtran_data = modtran_baseline)
+plot_modtran(filename = file.path(data_dir, "modtran_baseline.txt"))
 ```
 
 ```{r double_co2, include=TRUE, message=FALSE, warning=FALSE}
@@ -342,15 +346,28 @@ for (i in 1:4) {
 ```
 
 This gives us a nice way to run MODTRAN over and over, with many different
-values for the CO~2~ concentration:
+values for the CO~2~ concentration and recording the value of I~out~ for each
+concentration.
+
+In the loop below, we set all the greenhouse gases to zero and then vary CO~2~.
+We use a trick in R by making an empty tibble before we start the loop and then
+for each iteration of the loop, we use `bind_rows` to append a row with the 
+data from that loop iteration.
 
 ```{r modtran_loop, echo=TRUE, eval=FALSE, message=FALSE, warning=FALSE}
 co2_values = c(0, 200, 400, 600, 800, 1000, 1200)
+tbl = tibble()
 for (co2 in co2_values) {
-  filename = str_c("modtran_", co2, ".txt")
-  run_modtran(filename, co2_ppm = co2, atmosphere = "standard", 
-              altitude_km = 70)
+  filename = str_c("modtran_co2_", co2, ".txt")
+  mod_data = run_modtran(filename, co2_ppm = co2, ch4_ppm = 0, trop_o3_ppb = 0,
+                         strat_o3_scale = 0, h2o_scale = 0, freon_scale = 0,
+                         atmosphere = "standard", altitude_km = 70)
+  tbl = bind_rows(tbl, tibble(co2_ppm = co2, i_out = mod_data$i_out))
 }
+
+# The digits argument below sets the number of decimal places
+# for each column in the table.
+kable(tbl, digits = c(co2_ppm = 0, i_out = 1))
 ```
 
 This code runs `run_modtran` for each value of CO~2~ in `co2_values`
@@ -358,38 +375,30 @@ and saves the result to a file `modtran_0.txt`, `modtran_200.txt`, and so
 forth. I make the filenames from the values of `co2` using the `str_c` function, 
 which I explain below. 
 
-## Combining character variables
+## Manipulating text in R
 
 R has many functions for manipulating text. When R stores text, it stores it
 in character variables (these are also sometimes called "strings" because
-                        text is like a string of characters).
+text is like a string of characters).
 For instance, we might want to make a label or a filename by combining several 
 variables. 
-Three functions that we can use are `str_c`, from the `stringr` package and 
-`paste` and `paste0`,
-from basic R. All of these work pretty much the same way:
+We can use the function `str_c`, from the `tidyverse`:
   
 ```{r combining_strings, include=TRUE}
-print(paste("mail", "box"))
-print(paste("mail", "box", sep = ""))
-print(paste0("infra", "red"))
 print(str_c("infra", "red"))
 print(str_c("infra", "red", sep = "-"))
+print(str_c(10, "km", sep = " "))
 print(str_c("one", "two", "three", "four", sep = ", "))
-print(str_c(10, " km"))
 
 x = 50
 
+print(str_c(x, "Watts"))
 print(str_c(x, " Watts"))
 print(str_c(x, "Watts", sep = " "))
 ```
 
-Notice how `paste` puts spaces between the strings when it combines them unless
-you specify that `sep` (the separator) should be something different.
-`paste0` works just like `paste`, except that it doesn't have a separator, so
-the variables are combined without an extra space.
-`str_c` is like `paste0`, except that you can specify a separator if you do
-want something in between the different variables.
+Notice how `str_c` pastes the text together without any spaces between the 
+parts unless you tell it to use a separator (`sep`) between them.
 
 ## Calculating with leads and lags
 
@@ -397,7 +406,7 @@ Sometimes, when we are using `mutate` with a data tibble, we might want to
 look at differences between a row and the row before or after it in the
 tibble. We can do this with the `lead` and `lag` functions:
 
-In the examnple below, the column `u` gets the value of the current row of
+In the example below, the column `u` gets the value of the current row of
 `y` minus the previous row of `y`, and the column `v` gets the value of the
 next row of `y` minus the current row of `y`. Note that where there isn't a
 previous row, `lag` returns `NA` (missing value), and similarly for `lead`
@@ -406,21 +415,19 @@ when there isn't a next row.
 ```{r lead.lag, include=TRUE}
 tbl = tibble(x = 0:5, y = x^2)
 
-tbl = tbl %>% mutate(u = y - lag(y), v = lead(y) - y)
-tbl
+tbl = tbl %>% mutate("lag y" = lag(y), "lead y" = lead(y), u = y - lag(y), 
+                     v = lead(y) - y)
+kable(tbl)
 ```
 
 If you want to lead or lag by more than one row, you can just say, `lag(y, 5)`
 to get the value of `y` 5 rows before the current one.
 
 ```{r lead.lag.2, include = TRUE}
-
 tbl = tibble(x = 1:10)
-
 tbl = tbl %>% mutate(before = lag(x), after = lead(x), 
                      before.2 = lag(x, 2), after.3 = lead(x, 3))
-
-tbl
+kable(tbl)
 ```
 
 ## Modifying _x_ and _y_ axes in `ggplot`
@@ -454,6 +461,8 @@ ggplot(tbl, aes(x = x, y = y)) + geom_line() +
 
 # Exercises for Lab #3
 
+You should open the file `lab-03-exercises.Rmd` to do these exercises.
+
 ## Chapter 4 Exercises
 
 ### Exercise 4.1: Methane
@@ -461,90 +470,92 @@ ggplot(tbl, aes(x = x, y = y)) + geom_line() +
 Methane has a current concentration of 1.7 ppm in the atmosphere and
 is doubling at a faster rate than CO~2~.
 
-a) Would an additional 10 ppm of methane in the atmosphere have a larger or smaller
-  impact on the outgoing IR flux than an additional 10 ppm of CO~2~ at current
-  concentrations?
+a) Would an additional 10 ppm of methane in the atmosphere have a larger or 
+   smaller impact on the outgoing IR flux than an additional 10 ppm of CO~2~ 
+   at current concentrations?
 
 b) Where in the spectrum does methane absorb? What concentration does it take to
-  begin to saturate the absorption in this band? Explain what you are looking 
-  at to judge when the gas is saturated.
+   begin to saturate the absorption in this band? Explain what you are looking 
+   at to judge when the gas is saturated.
 
-  **Suggestion:**
+   **Suggestion:**
     
-  * Run MODTRAN with no greenhouse gases, except 0.4 ppm of methane.
-  * Run MODTRAN several times, successively doubling the amount of methane:
-    0.4 ppm, 0.8 ppm, 1.6 ppm, ... 102.4 ppm.
+   * Run MODTRAN with no greenhouse gases, except 0.4 ppm of methane.
+   * Run MODTRAN several times, successively doubling the amount of methane:
+     0.4 ppm, 0.8 ppm, 1.6 ppm, ... 102.4 ppm.
     
-    Hint: You can use the following R commands to do this:
+     Hint: You can use the following R commands to do this:
         
-    ```
-    methane_data = tibble() # create a blank data tibble
+     ``` r
+     methane_data = tibble() # create a blank data tibble
 
-    for (x in 0:11) {
-      # Repeat everything between the braces "{}" for x taking on
-      # each value in 0, 1, 2, ..., 11.
+     for (x in 0:11) {
+       # Repeat everything between the braces "{}" for x taking on
+       # each value in 0, 1, 2, ..., 11.
 
-      p_methane = 0.4 * (2^x) # methane concentration is 0.4 times 2 to the 
-                              # power of x.
+       p_methane = 0.4 * (2^x) # methane concentration is 0.4 times 2 to the 
+                               # power of x.
 
-      # Create a character variable that will be a file name of the form
-      # file.path(data_dir, "methane_xx_x.txt"), where xx_x is the methane 
-      # concentration, with an underscore for the decimal point.
-      methane_txt = formatC(p_methane, digits = 1, decimal.mark = "_", 
-                            format = "f")
-      file_name = str_c('methane_', methane_txt, ".txt")
-      file_name = file.path(data_dir, filename)
+       # Create a character variable that will be a file name of the form
+       # file.path(data_dir, "methane_xx_x.txt"), where xx_x is the methane 
+       # concentration, with an underscore for the decimal point.
+       methane_txt = formatC(p_methane, digits = 1, decimal.mark = "_", 
+                             format = "f")
+       file_name = str_c('methane_', methane_txt, ".txt")
+       file_name = file.path(data_dir, filename)
 
-      # Now run MODTRAN
-      results = run_modtran(file_name, co2_ppm = 0, ch4_ppm = p_methane, 
-                            trop_o3_ppb = 0, strat_o3_scale = 0, h2o_scale = 0, 
-                            freon_scale = 0, 
-                            delta_t = 0, h2o_fixed = "vapor pressure",
-                            atmosphere = "tropical", clouds = "none", 
-                            altitude_km = 70, looking = "down")
+       # Now run MODTRAN
+       results = run_modtran(file_name, co2_ppm = 0, ch4_ppm = p_methane, 
+                             trop_o3_ppb = 0, strat_o3_scale = 0, h2o_scale = 0, 
+                             freon_scale = 0, 
+                             delta_t = 0, h2o_fixed = "vapor pressure",
+                             atmosphere = "tropical", clouds = "none", 
+                             altitude_km = 70, looking = "down")
 
-      # Create a data tibble with columns for the methane concentration
-      # and I out, and append it to the end of the tibble methane_data
-      df = tibble(methane = results$ch4, i_out = results$i_out)
-      methane_data = bind_rows(methane_data, df)
-      }
-    ```
+       # Create a data tibble with columns for the methane concentration
+       # and I out, and append it to the end of the tibble methane_data
+       df = tibble(methane = results$ch4, i_out = results$i_out)
+       methane_data = bind_rows(methane_data, df)
+       }
+     ```
 
-    This will run MODTRAN for the different values of methane concentration and
-    save them in the `"_data"` folder as `"methane_0_4.txt"`, 
-    `"methane_0_8.txt"`, `"methane_1_6.txt"`, and so forth, up to 
-    `"methane_819_2.txt"`, and also create a data tibble `methane_data` 
-    with a list of methane concentrations and the corresponding 
-    $I_{\text{out}}$.
+     This will run MODTRAN for the different values of methane concentration and
+     save them in the `"_data"` folder as `"methane_0_4.txt"`, 
+     `"methane_0_8.txt"`, `"methane_1_6.txt"`, and so forth, up to 
+     `"methane_819_2.txt"`, and also create a data tibble `methane_data` 
+     with a list of methane concentrations and the corresponding 
+     $I_{\text{out}}$.
     
-  * Use `mutate` to add a new column `change`, which contains the change in 
-    $I_{\text{out}}$ between the previous row and this one. You can use the
-    `lag` command to calculate this, as described above in the "new R
-    functions" section.
-    ```
-    methane_data = methane_data %>% mutate(change = i_out - lag(i_out))
-    ```
+   * Use `mutate` to add a new column `change`, which contains the change in 
+     $I_{\text{out}}$ between the previous row and this one. You can use the
+     `lag` command to calculate this, as described above in the "new R
+     functions" section.
+     
+     ``` r
+     methane_data = methane_data %>% mutate(change = i_out - lag(i_out))
+     ```
 
-  * Now plot `i_out` versus the methane concentration several ways:
+   *  Now plot `i_out` versus the methane concentration several ways:
 
-    * First, just plot `i_out` versus `methane`:
-      ```
-      ggplot(methane_data, aes(x = methane, y = i_out)) + 
-        geom_point(size = 2) +
-        geom_line(size = 1) +
-        labs() # add parameters to labs to label your axes.
-      ```
+     * First, just plot `i_out` versus `methane`:
 
-    * Next, plot the same data, but with a logarithmic _x_-axis (use
-      `scale_x_log10`, as described above in the "New R Functions" section)
-    
-    * Next, plot `methane_concentration`, but assign the column `change`
-      to the _y_ axis, instead of the column `i_out`.
+       ``` r
+       ggplot(methane_data, aes(x = methane, y = i_out)) + 
+         geom_point(size = 2) +
+         geom_line(size = 1) +
+         labs() # add parameters to labs to label your axes.
+       ```
+
+     * Next, plot the same data, but with a logarithmic _x_-axis (use
+       `scale_x_log10`, as described above in the "New R Functions" section)
+
+     * Next, plot `methane_concentration`, but assign the column `change`
+       to the _y_ axis, instead of the column `i_out`.
       
-    * Think back to the slides I showed in class #6 about identifying band
-      saturation. Do you see a place where the successive changes in `i_out` 
-      flatten out?  Estimate the concentration of methane where absorption
-      saturates.
+     * Think back to the slides I showed in class #6 about identifying band
+       saturation. Do you see a place where the successive changes in `i_out` 
+       flatten out?  Estimate the concentration of methane where absorption
+       saturates.
 
 c) Would a doubling of methane have as great an impact on the heat balance as a 
    doubling of CO~2~?
