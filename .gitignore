@@ -30,11 +30,14 @@
 *.aux
 *.bak
 *.out
-*.log
+*.bbl
 *.blg
-*.toc
+*.ilg
 *.lof
+*.log
 *.lot
+*.out
+*.toc
 
 # Other miscellaneous files to ignore:
 README.html
