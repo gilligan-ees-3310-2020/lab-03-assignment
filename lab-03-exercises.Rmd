@@ -5,15 +5,15 @@ author: "put your name here"
 date: 'Lab: Mon. Jan. 27. Due: Mon. Feb. 3'
 fontsize: "12pt"
 output:
-  html_document: 
-    toc: true
   word_document:
     toc: true
-  pdf_document:
-    toc: true
-    includes:
-       in_header: ees3310.sty
   github_document:
+    toc: true
+  pdf_document: 
+    toc: yes
+    includes:
+      in_header: ees3310.sty
+  html_document: 
     toc: true
 ---
 ```{r setup, include=FALSE}
@@ -287,12 +287,13 @@ you came up with your answer.
 ## Exercise 5.2: Skin Height
 
 a) **Run the MODTRAN model using the "tropical" atmosphere, without clouds, 
-   and with present-day pCO~2~ (400 ppm). Use the ground temperature reported 
+   and with the present-day CO~2~ concentration (400 ppm). 
+   Use the ground temperature reported 
    by the model to calculate
-   &epsilon; &sigma; T~ground~^4^,
+   $\varepsilon \sigma T_{\text{ground}}^4$,
    the heat flux emitted by the ground.
-   Assume &epsilon; = 1, and I have already provided the value of the 
-   Stefan-Boltzmann constant &sigma;, as the R variable `sigma_sb`,
+   Assume $\varepsilon = 1$, and I have already provided the value of the 
+   Stefan-Boltzmann constant $\sigma$, as the R variable `sigma_sb`,
    which equals `r format_md(sigma_sb, digits = 3, format = "scientific")`.
    (I defined it in the script "utils.R", which I loaded in the "setup" chunk
    in the RMarkdown document).**
@@ -310,8 +311,8 @@ a) **Run the MODTRAN model using the "tropical" atmosphere, without clouds,
 include any data, plots, etc. that you need in order to explain how
 you came up with your answer.
 
-b) **Use the outgoing heat flux at the top of the atmosphere (I~out~) to calcuate 
-   the skin temperature (use the equation 
+b) **Use the outgoing heat flux at the top of the atmosphere (I~out~) to 
+   calculate the skin temperature (use the equation 
    $I_{\text{out}} = \varepsilon \sigma T_{\text{skin}}^4)$).
    What is the skin temperature, and how does it compare to the ground 
    temperature and the temperature at the tropopause, as reported by the 

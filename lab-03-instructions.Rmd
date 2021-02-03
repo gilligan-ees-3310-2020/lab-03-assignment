@@ -5,9 +5,11 @@ date: 'Lab: Mon. Feb. 8. Due: Mon. Feb. 15'
 subtitle: Exercises with the MODTRAN Model
 fontsize: 12pt
 output:
-  html_document:
-    toc: true
   github_document:
+    toc: true
+  word_document:
+    toc: true
+  html_document:
     toc: true
   pdf_document: 
     toc: true
