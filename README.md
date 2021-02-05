@@ -30,8 +30,9 @@ work.
 * In your local repository, answer the exercises in the template
   `lab-03-exercises.Rmd`.
 * When you are done, knit your `.Rmd` files into PDF files.
-* Use git to commit your changes (including the edits to the `.Rmd` files
-  and the new PDF files) to your local git repository.
+* Use git to stage your changed files (including the edits to the `.Rmd` files
+  and the new Word or PDF files) and then commit the changes to your local git 
+  repository.
 * Push the changes from your local git repository to github.
 
   The last changes that you push before the due date 
