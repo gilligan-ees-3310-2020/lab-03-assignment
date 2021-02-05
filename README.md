@@ -24,7 +24,7 @@ work.
 
 ## Instructions:
 
-* Accept this assignment.
+* Accept this assignment in GitHub Classroom.
 * Clone a local copy of the file repository from github to your
   own computer.
 * In your local repository, answer the exercises in the template
