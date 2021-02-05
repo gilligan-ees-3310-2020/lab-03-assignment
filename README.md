@@ -47,9 +47,10 @@ knit correctly.
 
 1. Successfully **knit** `lab-03-exercises.Rmd` into a `.pdf` or 
    Word (`.docx`) file. 
-2. **Commit** your `.Rmd` (rmarkdown) document **and** the `.pdf` or `.docx` 
-   file to your local git repository on your computer.
-3. **Push** your local repository to GitHub, so Ms. Best and Prof. Gilligan 
+2. **Stage** your `.Rmd` (rmarkdown) document **and** the `.pdf` or `.docx`.
+3. **Commit** the changes to these files into your local git repository on your
+   computer.
+3. **Push** your local repository to GitHub, so Mr. de Wet and Prof. Gilligan 
    can see your final results.
 
 **The last version of your work that you have pushed by the deadline is what 

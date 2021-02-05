@@ -17,13 +17,13 @@ Lab: Mon. Feb. 8. Due: Mon. Feb. 15
     -   [Modifying *x* and *y* axes in
         `ggplot`](#modifying-x-and-y-axes-in-ggplot)
 -   [Exercises for Lab \#3](#exercises-for-lab-3)
-    -   [Chapter 4 Exercises](#chapter-4-exercises)
-        -   [Exercise 4.1: Methane](#exercise-4.1-methane)
-        -   [Exercise 4.2: CO<sub>2</sub> (Graduate students
-            only)](#exercise-4.2-co2-graduate-students-only)
-        -   [Exercise 4.3: Water vapor](#exercise-4.3-water-vapor)
-    -   [Chapter 5 Exercise](#chapter-5-exercise)
-        -   [Exercise 5.2: Skin Height](#exercise-5.2-skin-height)
+-   [Chapter 4 Exercises](#chapter-4-exercises)
+    -   [Exercise 4.1: Methane](#exercise-4.1-methane)
+    -   [Exercise 4.2: CO<sub>2</sub> (Graduate students
+        only)](#exercise-4.2-co2-graduate-students-only)
+    -   [Exercise 4.3: Water vapor](#exercise-4.3-water-vapor)
+-   [Chapter 5 Exercise](#chapter-5-exercise)
+    -   [Exercise 5.2: Skin Height](#exercise-5.2-skin-height)
 
 # Instructions
 
@@ -549,104 +549,69 @@ ggplot(tbl, aes(x = x, y = y)) + geom_line() +
 
 You should open the file `lab-03-exercises.Rmd` to do these exercises.
 
-## Chapter 4 Exercises
+# Chapter 4 Exercises
 
-### Exercise 4.1: Methane
+## Exercise 4.1: Methane
 
 Methane has a current concentration of 1.7 ppm in the atmosphere and is
 doubling at a faster rate than CO<sub>2</sub>.
 
-1.  Would an additional 10 ppm of methane in the atmosphere have a
+1.  **Would an additional 10 ppm of methane in the atmosphere have a
     larger or smaller impact on the outgoing IR flux than an additional
-    10 ppm of CO<sub>2</sub> at current concentrations?
-
-2.  Where in the spectrum does methane absorb? What concentration does
-    it take to begin to saturate the absorption in this band? Explain
-    what you are looking at to judge when the gas is saturated.
+    10 ppm of CO<sub>2</sub> at current concentrations?**
 
     **Suggestion:**
 
-    -   Run MODTRAN with no greenhouse gases, except 0.4 ppm of methane.
+    -   Run MODTRAN in the default configuration (400 ppm CO<sub>2</sub>
+        and 1.7 ppm methane)
+    -   Run MODTRAN with an extra 10 ppm of CO<sub>2</sub> and the
+        normal amount of methane.
+    -   Run MODTRAN with the normal amount of CO<sub>2</sub> and an
+        extra 10 ppm of methane.
 
-    -   Run MODTRAN several times, successively doubling the amount of
-        methane: 0.4 ppm, 0.8 ppm, 1.6 ppm, … 102.4 ppm.
+    What would you look at from the three runs to figure out whether 10
+    ppm of methane or 10 ppm of CO<sub>2</sub> had the greater effect?
 
-        Hint: You can use the following R commands to do this:
+2.  **Where in the spectrum does methane absorb? What concentration does
+    it take to begin to saturate the absorption in this band? Explain
+    what you are looking at to judge when the gas is saturated.**
 
-        ``` r
-        methane_data = tibble() # create a blank data tibble
+    **Hints**:  
+    I recommend setting all the greenhouse gases to zero, and run
+    MODTRAN. Then run MODTRAN for several values of methane, starting at
+    1 ppm and doubling the concentration until you get to around 128
+    ppm. You can do this using a `for` loop, following the examples from
+    the lab instructions.
 
-        for (x in 0:11) {
-          # Repeat everything between the braces "{}" for x taking on
-          # each value in 0, 1, 2, ..., 11.
+    To set all the greenhouse gases to zero, you would call
+    `run_modtran(co2_ppm = 0, ch4_ppm = 0, trop_o3_ppb = 0, strat_o3_scale = 0, h2o_scale = 0, freon_scale = 0)`
 
-          p_methane = 0.4 * (2^x) # methane concentration is 0.4 times 2 to the 
-                                  # power of x.
+    The spectrum of methane is complicated so it doesn’t saturate all at
+    once. Use `plot_modtran` to plot the spectrum for each concentration
+    and describe what you see and where you think methane begins to
+    saturate and why.
 
-          # Create a character variable that will be a file name of the form
-          # file.path(data_dir, "methane_xx_x.txt"), where xx_x is the methane 
-          # concentration, with an underscore for the decimal point.
-          methane_txt = formatC(p_methane, digits = 1, decimal.mark = "_", 
-                                format = "f")
-          file_name = str_c('methane_', methane_txt, ".txt")
-          file_name = file.path(data_dir, filename)
+    By default, `plot_modtran` gives a plot a title that indicates the
+    CO<sub>2</sub> concentration. Here, CO<sub>2</sub> doesn’t change
+    and we’re interested in the CH<sub>4</sub> concentration, so you can
+    use the `descr` argument to `plot_modtran` to give the plots
+    different titles. See the example below.
 
-          # Now run MODTRAN
-          results = run_modtran(file_name, co2_ppm = 0, ch4_ppm = p_methane, 
-                                trop_o3_ppb = 0, strat_o3_scale = 0, h2o_scale = 0, 
-                                freon_scale = 0, 
-                                delta_t = 0, h2o_fixed = "vapor pressure",
-                                atmosphere = "tropical", clouds = "none", 
-                                altitude_km = 70, looking = "down")
+    Remember that if you want to make several plots using a `for` loop,
+    you need to assign the result from `plot_modtran` or `ggplot` to a
+    variable and then use the `plot` or `print` function.
 
-          # Create a data tibble with columns for the methane concentration
-          # and I out, and append it to the end of the tibble methane_data
-          df = tibble(methane = results$ch4, i_out = results$i_out)
-          methane_data = bind_rows(methane_data, df)
-          }
-        ```
+    ``` r
+    for (ch4 in ch4_list) {
+      mod_data = run_modtran(co2_ppm = 0, ch4_ppm = ch4, trop_o3_ppb = 0,
+      strat_o3_scale = 0, h2o_scale = 0, freon_scale = 0)
+      p = plot_modtran(mod_data)
+      plot(p) # you could also say print(p) here.
+    }
+    ```
 
-        This will run MODTRAN for the different values of methane
-        concentration and save them in the `"_data"` folder as
-        `"methane_0_4.txt"`, `"methane_0_8.txt"`, `"methane_1_6.txt"`,
-        and so forth, up to `"methane_819_2.txt"`, and also create a
-        data tibble `methane_data` with a list of methane concentrations
-        and the corresponding *I*<sub>out</sub>.
-
-    -   Use `mutate` to add a new column `change`, which contains the
-        change in *I*<sub>out</sub> between the previous row and this
-        one. You can use the `lag` command to calculate this, as
-        described above in the “new R functions” section.
-
-        ``` r
-        methane_data = methane_data %>% mutate(change = i_out - lag(i_out))
-        ```
-
-    -   Now plot `i_out` versus the methane concentration several ways:
-
-    -   First, just plot `i_out` versus `methane`:
-
-        ``` r
-        ggplot(methane_data, aes(x = methane, y = i_out)) + 
-          geom_point(size = 2) +
-          geom_line(size = 1) +
-          labs() # add parameters to labs to label your axes.
-        ```
-
-    -   Next, plot the same data, but with a logarithmic *x*-axis (use
-        `scale_x_log10`, as described above in the “New R Functions”
-        section)
-
-    -   Next, plot `methane_concentration`, but assign the column
-        `change` to the *y* axis, instead of the column `i_out`.
-
-    -   Think back to the slides I showed in class \#6 about identifying
-        band saturation. Do you see a place where the successive changes
-        in `i_out` flatten out? Estimate the concentration of methane
-        where absorption saturates.
-
-3.  Would a doubling of methane have as great an impact on the heat
-    balance as a doubling of CO<sub>2</sub>?
+3.  **Would a doubling of methane have as great an impact on the heat
+    balance as a doubling of CO<sub>2</sub>?**
 
     **Suggestion:**
 
@@ -657,48 +622,48 @@ doubling at a faster rate than CO<sub>2</sub>.
         CO<sub>2</sub> concentration.
     -   Compare *I*<sub>out</sub> for the three runs.
 
-4.  What is the “equivalent CO<sub>2</sub>” of doubling atmospheric
+4.  **What is the “equivalent CO<sub>2</sub>” of doubling atmospheric
     methane? That is to say, how many ppm of CO<sub>2</sub> would lead
     to the same change in outgoing IR radiation energy flux as doubling
     methane? What is the ratio of ppm CO<sub>2</sub> change to ppm
-    methane change?
+    methane change?**
 
-    **Suggestion:** This is easier to do interactively with the
-    web-based interface to MODTRAN than by running it in R.
+## Exercise 4.2: CO<sub>2</sub> (Graduate students only)
 
-    -   Run MODTRAN in its default configuration (400 ppm CO<sub>2</sub>
-        and 1.7 ppm methane)
-    -   Run MODTRAN again with the methane doubled. Note
-        *I*<sub>out</sub>.
-    -   Return methane to the default value (1.7 ppm), and adjust
-        CO<sub>2</sub> until *I*<sub>out</sub> is the same as it was for
-        the doubled methane. Note what concentration of CO<sub>2</sub>
-        does this.
-    -   Now you can use R to run MODTRAN with doubled methane and with
-        the equivalent concentration of CO<sub>2</sub>, and save these
-        runs to the disk.
-
-### Exercise 4.2: CO<sub>2</sub> (Graduate students only)
-
-1.  Is the direct effect of increasing CO<sub>2</sub> on the energy
+1.  **Is the direct effect of increasing CO<sub>2</sub> on the energy
     output at the top of the atmosphere larger in high latitudes or in
-    the tropics? Compare the change in *I*<sub>out</sub> from doubling
-    CO<sub>2</sub> with the atmosphere set to `tropical`,
-    `midlatitude summer`, and `subartcic summer`.
+    the tropics?**
 
-    For each atmosphere, first record *I*<sub>out</sub> with
-    CO<sub>2</sub> at 400 ppm and then record the change when you
-    increase CO<sub>2</sub> to 800 ppm.
+    **Hint:** Run MODTRAN with the atmosphere set to `tropical`,
+    `midlatitude summer`, and `subarctic summer`, and for each
+    atmosphere, at 400 ppm and 800 ppm CO<sub>2</sub>. For each
+    atmosphere, calculate the difference between I<sub>out</sub> at 400
+    and 800 ppm CO<sub>2</sub> and determine how the effect of doubling
+    CO<sub>2</sub> varies as you go from tropical latitudes to subarctic
+    ones.
 
-2.  Set pCO<sub>2</sub> to an absurdly high value of 10,000 ppm. You
+2.  **Set pCO<sub>2</sub> to an absurdly high value of 10,000 ppm. You
     will see a spike in the CO<sub>2</sub> absorption band. What
     temperature is this light coming from? Where in the atmosphere do
-    you think this comes from?
+    you think this comes from?**
 
-    Now turn on clouds and run the model again. Explain what you see.
-    Why are night-time temperatures warmer when there are clouds?
+    **Now turn on clouds and run the model again. Explain what you see.
+    Why are night-time temperatures warmer when there are clouds?**
 
-### Exercise 4.3: Water vapor
+    **Hint:** MODTRAN simulates the upward directed, outgoing longwave
+    radiation as seen by a sensor looking down from some height. For the
+    first part of this exercise, start with the sensor at its default
+    altitude of 70 km (you set this with the `altitude_km` argument to
+    `run_modtran`), and successively lower it by 10 km at a time until
+    you get to 10 km. What happens to the spike as you lower the sensor?
+    What does this say about what part of the atmosphere is responsible
+    for the spike in the middle of the CO<sub>2</sub> absorption at very
+    high values of CO<sub>2</sub>?
+
+    For the second part of this exercise, try using “altostratus”
+    clouds.
+
+## Exercise 4.3: Water vapor
 
 Our theory of climate presumes that an increase in the temperature at
 ground level will lead to an increase in the outgoing IR energy flux at
@@ -706,21 +671,18 @@ the top of the atmosphere.
 
 1.  How much extra outgoing IR would you get by raising the temperature
     of the ground by 5°C? What effect does the ground temperature have
-    on the shape of the outgoing IR spectrum and why?
+    on the shape of the outgoing IR spectrum and why?\*\*
 
-    -   Note the *I*<sub>out</sub> for the default conditions. Then set
-        `delta_t` to 5 and run MODTRAN again, and note the new value of
-        *I*<sub>out</sub>.
+    **HINT**: You can raise the temperature of the ground with the
+    `delta_t` artument to MODTRAN.
 
-    -   Plot the spectrum for both runs and compare.
-
-2.  More water can evaporate into warm air than into cool air. Change
+2.  **More water can evaporate into warm air than into cool air. Change
     the model settings to hold the water vapor at constant relative
     humidity rather than constant vapor pressure (the default),
     calculate the change in outgoing IR energy flux for a 5°C
     temperature increase. Is it higher or lower? Does water vapor make
     the Earth more sensitive to CO<sub>2</sub> increases or less
-    sensitive?
+    sensitive?**
 
     **Note:** By default, the MODTRAM model holds water vapor pressure
     constant, but you can set it to hold relative humidity constant
@@ -728,67 +690,66 @@ the top of the atmosphere.
     this:
     `run_modtran(file_name, delta_t = 5, h2o_fixed = "relative humidity")`.
 
-3.  Now see this effect in another way.
+3.  **Now see this effect in another way.**
 
-    -   Starting from the default base case, record the total outgoing
-        IR flux.
+    -   **Starting from the default base case, record the total outgoing
+        IR flux.**
 
-    -   Now double pCO2. The temperature in the model stays the same
-        (that’s how the model is written), but the outgoing IR flux goes
-        down.
+    -   **Now double CO<sub>2</sub>. The temperature in the model stays
+        the same (that’s how the model is written), but the outgoing IR
+        flux goes down.**
 
-    -   Using constant water vapor pressure, adjust the temperature
+    -   **Using constant water vapor pressure, adjust the temperature
         offset until you get the original IR flux back again. Record the
-        change in temperature
+        change in temperature.**
 
-    -   Now repeat the exercise, but holding the relative humidity fixed
-        instead of the water vapor pressure.
+    -   **Now repeat the exercise, but holding the relative humidity
+        fixed instead of the water vapor pressure.**
 
-    -   The ratio of the warming when you hold relative humidity fixed
+    -   **The ratio of the warming when you hold relative humidity fixed
         to the warming when you hold water vapor pressure fixed is the
-        feedback factor for water vapor. What is it?
+        feedback factor for water vapor. What is it?**
 
-## Chapter 5 Exercise
+# Chapter 5 Exercise
 
-### Exercise 5.2: Skin Height
+## Exercise 5.2: Skin Height
 
-1.  Run the MODTRAN model in using the “Tropical” atmosphere, without
-    clouds, and with present-day pCO<sub>2</sub> (400 ppm). Use the
-    ground temperature reported by the model to calculate
+1.  **Run the MODTRAN model using the “tropical” atmosphere, without
+    clouds, and with the present-day CO<sub>2</sub> concentration (400
+    ppm). Use the ground temperature reported by the model to calculate
     *ε**σ**T*<sub>ground</sub><sup>4</sup>, the heat flux emitted by the
-    ground.
-
-    Assume *ε* = 1, and I have already provided the value of the
+    ground. Assume *ε* = 1, and I have already provided the value of the
     Stefan-Boltzmann constant *σ*, as the R variable `sigma_sb`, which
     equals 5.670×10<sup>-8</sup>. (I defined it in the script “utils.R”,
-    which I loaded in the “setup” chunk in the RMarkdown document).
+    which I loaded in the “setup” chunk in the RMarkdown document).**
 
-    Next, look at the outgoing heat flux at the top of the atmosphere
-    (70 km) reported by the MODTRAN model. Is it greater or less than
-    the heat flux that you calculated was emitted by the ground?
+    **Next, look at the outgoing heat flux at the top of the atmosphere
+    (70 km) (I<sub>out</sub>) reported by the MODTRAN model. Is it
+    greater or less than the heat flux that you calculated was emitted
+    by the ground?**
 
-2.  Use the outgoing heat flux at the top of the atmosphere to calcuate
-    the skin temperature (use the equation
-    *I*<sub>out</sub> = *ε**σ**T*<sub>skin</sub><sup>4</sup>). What is
-    the skin temperature, and how does it compare to the ground
+2.  **Use the outgoing heat flux at the top of the atmosphere
+    (I<sub>out</sub>) to calculate the skin temperature (use the
+    equation *I*<sub>out</sub> = *ε**σ**T*<sub>skin</sub><sup>4</sup>)).
+    What is the skin temperature, and how does it compare to the ground
     temperature and the temperature at the tropopause, as reported by
-    the MODTRAN model?
+    the MODTRAN model (`t_tropo`)?**
 
-    Assuming an environmental lapse rate of 6K/km, and using the skin
+    **Assuming an environmental lapse rate of 6K/km, and using the skin
     temperature that you calculated above, and the ground temperature
     from the model, what altitude would you expect the skin height to
-    be?
+    be?**
 
-3.  Double the CO<sub>2</sub> concentration and run MODTRAN again. Do
+3.  **Double the CO<sub>2</sub> concentration and run MODTRAN again. Do
     not adjust the ground temperature. Repeat the calculations from (b)
-    of the skin temperature and the estimated skin height.
+    of the skin temperature and the estimated skin height.**
 
-    What is the new skin temperature? What is the new skin height?
+    **What is the new skin temperature? What is the new skin height?**
 
-4.  Put the CO<sub>2</sub> back to today’s value, but add cirrus clouds,
-    using the “standard cirrus” value for the clouds. Repeat the
-    calculations from (b) of the skin temperature and the skin height.
+4.  **Put the CO<sub>2</sub> back to today’s value, but add cirrus
+    clouds, using the “standard cirrus” value for the clouds. Repeat the
+    calculations from (b) of the skin temperature and the skin height.**
 
-    What is the new skin temperature? What is the new skin height? Did
+    **What is the new skin temperature? What is the new skin height? Did
     the clouds or the doubled CO<sub>2</sub> have a greater effect on
-    the skin height?
+    the skin height?**
