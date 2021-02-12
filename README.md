@@ -36,7 +36,7 @@ work.
 * Push the changes from your local git repository to github.
 
   The last changes that you push before the due date 
-  (9:00 AM on Monday Feb. 3) will be graded.
+  (9:00 AM on Monday Feb. 15) will be graded.
 
 I advise using git to commit changes frequently as you work and push those 
 commits to GitHub.

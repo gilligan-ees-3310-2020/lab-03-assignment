@@ -1,5 +1,11 @@
-library(pacman)
-p_load(tidyverse, jsonlite, httr, magrittr)
+library(tidyverse)
+library(jsonlite)
+library(httr)
+library(magrittr)
+
+.rrtm <- new.env(parent = globalenv())
+assign("rrtm_url", "http://climatemodels.uchicago.edu/cgi-bin/rrtm/rrtm.py",
+       envir = .rrtm)
 
 # rrtm_params <- read_rds(file.path(find_rstudio_root_file("_data"),
 #                                   "params.Rds"))
@@ -42,8 +48,8 @@ read_rrtm <- function(file = NULL, data = NULL) {
     relative_humidity = relativeHumidity,
     lapse_rate = lapseRate, tropopause_km = tropopause,
     albedo = asdir, cloud_drop_radius = r_liq[1],
-    low_cloud_frac = cldf[stratus_index],
-    high_cloud_frac = cldf[cirrus_index],
+    low_cloud_frac = as.numeric(stratus),
+    high_cloud_frac = as.numeric(cirrus),
     aerosols = aerosols,
     profile = tibble(altitude = altitude, T = T, P = lev),
     fluxes = tibble(altitude = c(0, altitude), T = c(Ts, T), P = c(ps, lev),
@@ -65,7 +71,11 @@ run_rrtm <- function(file = NULL, I_solar = 1360.0, T_surface = 284.42,
                      aerosols = "none",
                      albedo = NULL) {
 
-  rrtm_url <- "http://climatemodels.uchicago.edu/cgi-bin/rrtm/rrtm.py"
+  if (exists("rrtm_url", envir = .rrtm)) {
+    rrtm_url <- get("rrtm_url", envir = .rrtm)
+  } else {
+    rrtm_url <- "http://climatemodels.uchicago.edu/cgi-bin/rrtm/rrtm.py"
+  }
 
   surface_table = tribble(
     ~key, ~descr,
@@ -179,11 +189,23 @@ run_rrtm <- function(file = NULL, I_solar = 1360.0, T_surface = 284.42,
     lapseRate = lapse_rate, tropopause = tropopause_km,
     r_liq = rep_len(cloud_drop_radius, n_layers),
     aerosols = aerosol_key,
-    asdir = surface_albedo
+    asdir = surface_albedo,
+    stratus = format(low_cloud_frac),
+    cirrus = format(high_cloud_frac)
   )
 
-  stratus_index <- closest_layer_index(1.0, params$altitude)
-  cirrus_index <- closest_layer_index(params$tropopause, params$altitude)
+  if (exists("default_data", envir = .rrtm)) {
+    params$altitude = .rrtm$default_data$altitude
+  }
+
+  if (is.null(params$altitude)) {
+    stratus_index <- 7
+    cirrus_index <- 46
+
+  } else {
+    stratus_index <- closest_layer_index(1.0, params$altitude)
+    cirrus_index <- closest_layer_index(params$tropopause, params$altitude)
+  }
 
   params$cldf <- rep_len(0, n_layers)
   params$cldf[stratus_index] <- low_cloud_frac
@@ -235,10 +257,11 @@ plot_heat_flows <- function(rrtm, sw = TRUE, lw = TRUE, total = TRUE,
              ordered(levels = c("Total", "SW", "LW")),
            dir = ifelse(str_detect(var, "up"), "Up", "Down") %>%
              ordered(levels = c("Down", "Up"))) %>%
-    filter(lambda %in% criteria)
+    filter(lambda %in% criteria) %>%
+    arrange(altitude)
 
-    ggplot(data, aes(x = val, y = altitude, color = lambda, size = dir)) +
-    geom_line() +
+  ggplot(data, aes(x = val, y = altitude, color = lambda, size = dir)) +
+    geom_path() +
     scale_color_manual(values = c(SW = "#B0B040", LW = "#D00000",
                                   Total = "purple"), name = "Wavelength") +
     scale_size_manual(values = c(Down = .5, Up = 1), name = "Direction") +
@@ -246,3 +269,21 @@ plot_heat_flows <- function(rrtm, sw = TRUE, lw = TRUE, total = TRUE,
     labs(x = expression(paste("Intensity ", (W/m^2))), y = "Altitude (km)") +
     theme_bw(base_size = text_size)
 }
+
+initialize_rrtm <- function() {
+  success <- FALSE
+  default_res <- POST(.rrtm$rrtm_url, body = "{}", encode = "raw",
+                      config = list(pragma = "no-cache",
+                                    "Cache-Control" = "no-cache"))
+  if (default_res$status_code == 200) {
+    assign("default_data", default_res$content %>% rawToChar() %>% fromJSON(),
+           envir = .rrtm)
+    success <- TRUE
+  } else {
+    warning("rrtm.R could not initialize default data")
+  }
+  invisible(success)
+}
+
+initialize_rrtm()
+
