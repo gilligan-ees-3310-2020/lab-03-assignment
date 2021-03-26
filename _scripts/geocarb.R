@@ -1,25 +1,22 @@
-library(pacman)
-
-p_load(tidyverse)
-p_load(stringr)
-p_load(scales)
-p_load(xml2)
+library(tidyverse)
+library(scales)
+library(xml2)
 
 column_names = c(
   year = "year",
-  tco2 = "co2.total",
-  pCO2 = "co2.atmos",
-  alk = "alkalinity.ocean",
-  d13Cocn = "delta.13C.ocean",
-  d13Catm = "delta.13C.atmos",
-  CO3 = "carbonate.ocean",
-  WeatC = "carbonate.weathering",
-  WeatS = "silicate.weathering",
-  TotW = "total.weathering",
-  BurC = "carbon.burial",
-  Degas = "degassing.rate",
-  Tatm = "temp.atmos",
-  Tocn = "temp.ocean"
+  tco2 = "co2_total",
+  pCO2 = "co2_atmos",
+  alk = "alkalinity_ocean",
+  d13Cocn = "delta_13C_ocean",
+  d13Catm = "delta_13C_atmos",
+  CO3 = "carbonate_ocean",
+  WeatC = "carbonate_weathering",
+  WeatS = "silicate_weathering",
+  TotW = "total_weathering",
+  BurC = "carbon_burial",
+  Degas = "degassing_rate",
+  Tatm = "temp_atmos",
+  Tocn = "temp_ocean"
 )
 
 column_descr = c(
@@ -49,7 +46,8 @@ columns = tibble(
   )
 
 
-run_geocarb = function(filename, co2_spike,
+run_geocarb = function(co2_spike,
+                       filename = NULL,
                        degas_spinup = 7.5,
                        degas_sim = 7.5,
                        plants_spinup = TRUE,
@@ -59,26 +57,23 @@ run_geocarb = function(filename, co2_spike,
                        delta_t2x = 3.0,
                        million_years_ago = 0,
                        mean_latitude_continents = 30) {
-  if (missing(filename)) {
-    filename = NULL
-  }
   gc_url = str_c("http://climatemodels.uchicago.edu/cgi-bin/geocarb/geocarb.cgi?",
-                 str_c(
-                   c('year', 'co2_1', 'co2_2',
-                     'dt2x', 'latitude',
-                     'plnt_1', 'plnt_2',
-                     'lnd_1', 'lnd_2', 'spike', "spike13C"),
-                   c(million_years_ago,
-                     degas_spinup, degas_sim,
-                     delta_t2x, mean_latitude_continents,
-                     as.integer(plants_spinup), as.integer(plants_sim),
-                     land_area_spinup, land_area_sim, co2_spike, -20),
-                   sep = "=", collapse = "&"
-                 ))
+              str_c(
+                c('year', 'co2_1', 'co2_2',
+                  'dt2x', 'latitude',
+                  'plnt_1', 'plnt_2',
+                  'lnd_1', 'lnd_2', 'spike', 'spike13C'),
+                c(million_years_ago,
+                  degas_spinup, degas_sim,
+                  delta_t2x, mean_latitude_continents,
+                  as.integer(plants_spinup), as.integer(plants_sim),
+                  land_area_spinup, land_area_sim, co2_spike, -20),
+                sep = "=", collapse = "&"
+              ))
   results = read_html(gc_url)
   body <- as_list(results) %>% unlist() %>% simplify()
   if (! is.null(filename)) {
-    write(body, filename)
+  write(body, filename)
   }
   lines = body %>% str_split("\n") %>% unlist()
   lines %>% str_trim() %>% str_replace_all('[ \t]+', ',') %>%

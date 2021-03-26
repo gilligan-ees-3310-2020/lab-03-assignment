@@ -1,7 +1,5 @@
-library(tidyverse)
-library(jsonlite)
-library(httr)
-library(magrittr)
+library(pacman)
+p_load(tidyverse, jsonlite, httr, magrittr)
 
 .rrtm <- new.env(parent = globalenv())
 assign("rrtm_url", "http://climatemodels.uchicago.edu/cgi-bin/rrtm/rrtm.py",

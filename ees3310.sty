@@ -15,6 +15,7 @@
 % \usepackage[normalem]{ulem}
 \usepackage{makecell}
 \usepackage{xcolor}
+\usepackage{makecmds}
 
 \newcommand{\COO}{\ce{CO2}}
 \newcommand{\methane}{\ce{CH4}}
@@ -34,5 +35,14 @@
 \newcommand{\pH}{p\ce{H}}
 \newcommand{\permil}{\permille}
 
-\renewenvironment{Shaded}{\begin{snugshade}\small}{\end{snugshade}}
-\renewcommand{\AttributeTok}[1]{\textcolor[rgb]{0.42,0.37,0.12}{#1}}
+\newcommand{\alintertext}[1]{%
+  \noalign{%
+    \vskip\belowdisplayshortskip
+    \vtop{\hsize=\linewidth#1\par
+      \expandafter}%
+    \expandafter\prevdepth\the\prevdepth
+  }%
+}
+
+\makeenvironment{Shaded}{\begin{snugshade}\small}{\end{snugshade}}
+\makecommand{\AttributeTok}[1]{\textcolor[rgb]{0.42,0.37,0.12}{#1}}
