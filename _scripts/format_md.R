@@ -9,7 +9,7 @@ format_engr = function(x, digits = 6) {
                            "(?<int>[0-9]+)",
                            "(?<decimal>\\.(?<frac>[0-9]+)?)?",
                            "([Ee](?<exp>(?<expsign>[+-])?(?<expval>[0-9]+)))?"
-                           )) %>%
+                     )) %>%
     set_names(c("x_sci", "sign", "int", "decimal", "frac",
                 "exp_str", "exp", "exp_sign", "exp_val"))
 
@@ -23,7 +23,7 @@ format_engr = function(x, digits = 6) {
       }
       if (str_length(parts['frac']) < exp_adj) {
         parts['frac'] <- str_c(parts['frac'],
-                            strrep("0", exp_adj - str_length(parts['frac'])))
+                               strrep("0", exp_adj - str_length(parts['frac'])))
       }
       delta <- str_sub(parts['frac'], end = exp_adj)
       parts['frac'] <- str_sub(parts['frac'], exp_adj + 1)
@@ -50,8 +50,8 @@ format_md = function(x, digits = NULL,
   fixup_scientific = function(s, output_format = c("markdown", "latex")) {
     output_format = match.arg(output_format)
     if (output_format == 'markdown') {
-    str_replace_all(s,  c('\\+' = '',
-                          '[Ee](-?)0*(0|[1-9][0-9]*)$' = '&times;10^\\1\\2^'))
+      str_replace_all(s,  c('\\+' = '',
+                            '[Ee](-?)0*(0|[1-9][0-9]*)$' = '&times;10^\\1\\2^'))
     } else {
       str_replace_all(s,  c('\\+' = '',
                             '[Ee](-?)0*(0|[1-9][0-9]*)$' = '\\times 10^{\\1\\2}')) %>%
@@ -61,14 +61,16 @@ format_md = function(x, digits = NULL,
 
   if (! is.null(digits)) x = signif(x, digits + 1)
   if (format == 'auto') {
-    fixed = formatC(x, digits = digits + 1, format = 'fg', flag = '#',
+    if (! is.null(digits)) digits = digits + 1
+    fixed = formatC(x, digits = digits, format = 'fg', flag = '#',
                     big.mark = mark)
     sci = formatC(x, digits = digits, format = 'e')
     formatted = ifelse(str_length(fixed) > getOption('scipen') + str_length(sci),
-                      fixup_scientific(sci, output_format = output_format),
-                      fixed)
+                       fixup_scientific(sci, output_format = output_format),
+                       fixed)
   } else if (format == "normal") {
-    formatted = formatC(x, digits = digits + 1, format = 'fg', flag = '#',
+    if (! is.null(digits)) digits = digits + 1
+    formatted = formatC(x, digits = digits, format = 'fg', flag = '#',
                         big.mark = mark)
   } else if (format == "scientific") {
     formatted = formatC(x, digits = digits, format = 'e') %>%
