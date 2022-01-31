@@ -1,7 +1,7 @@
 ---
 title: 'Instructions for EES 3310/5310 Lab #3'
 author: "Jonathan Gilligan"
-date: 'Lab: Mon. Feb. 8. Due: Mon. Feb. 15'
+date: 'Lab: Mon. Feb. 7. Due: Wed. Feb 16'
 subtitle: Exercises with the MODTRAN Model
 fontsize: 12pt
 output:
@@ -473,7 +473,7 @@ ggplot(tbl, aes(x = x, y = y)) + geom_line() +
 
 # Exercises for Lab #3
 
-You should open the file `lab-03-exercises.Rmd` to do these exercises.
+You should open the file `lab-03-report.Rmd` to do these exercises.
 
 # Chapter 4 Exercises
 
@@ -531,6 +531,31 @@ b) **Where in the spectrum does methane absorb? What concentration does it take
      plot(p) # you could also say print(p) here.
    }
    ```
+   
+   This will take some time to run because it needs to run MODTRAN for each 
+   different value of `ch4`, so you might want to tell R to save the output
+   from the model in a file, and tell R to check whether that file exists
+   and if it does, read from the file instead of running the model again:
+   ``` r
+   for (ch4 in ch4_list) {
+     # make a name for the model-output file: "_data/modtran_ch4_0_ppm.txt",
+     # "_data/modtran_ch4_1.7_ppm.txt", etc.
+     mod_file = str_c("_data/modtran_ch4_", ch4, "_ppm.txt")
+     if (! file.exists(mod_file)) {
+       mod_data = run_modtran(filename = mod_file, co2_ppm = 0, ch4_ppm = ch4, 
+                              trop_o3_ppb = 0, strat_o3_scale = 0, 
+                              h2o_scale = 0, freon_scale = 0)
+     } else {
+       mod_data = read_modtran(mod_file)
+     }
+     p = plot_modtran(mod_data)
+     plot(p) # you could also say print(p) here.
+   }
+   ```
+   But if you do this, then if you change the way you run the model 
+   (e.g., change some of the parameters to `run_modtran`, such as the 
+   altitude or the atmosphere), you will need to manually delete the files
+   in the `_data` directory to make R run the model with the new parameters.
 
 c) **Would a doubling of methane have as great an impact on the heat balance as a 
    doubling of CO~2~?**

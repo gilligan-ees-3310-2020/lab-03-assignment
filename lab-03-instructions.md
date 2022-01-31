@@ -1,10 +1,10 @@
-Instructions for EES 3310/5310 Lab \#3
+Instructions for EES 3310/5310 Lab #3
 ================
 Jonathan Gilligan
-Lab: Mon. Feb. 8. Due: Mon. Feb. 15
+Lab: Mon. Feb. 7. Due: Wed. Feb 16
 
 -   [Instructions](#instructions)
-    -   [Using MODTRAN with RMarkdown.](#using-modtran-with-rmarkdown.)
+    -   [Using MODTRAN with RMarkdown.](#using-modtran-with-rmarkdown)
         -   [Converting temperature
             units](#converting-temperature-units)
     -   [Examples:](#examples)
@@ -16,14 +16,14 @@ Lab: Mon. Feb. 8. Due: Mon. Feb. 15
         lags](#calculating-with-leads-and-lags)
     -   [Modifying *x* and *y* axes in
         `ggplot`](#modifying-x-and-y-axes-in-ggplot)
--   [Exercises for Lab \#3](#exercises-for-lab-3)
+-   [Exercises for Lab #3](#exercises-for-lab-3)
 -   [Chapter 4 Exercises](#chapter-4-exercises)
-    -   [Exercise 4.1: Methane](#exercise-4.1-methane)
+    -   [Exercise 4.1: Methane](#exercise-41-methane)
     -   [Exercise 4.2: CO<sub>2</sub> (Graduate students
-        only)](#exercise-4.2-co2-graduate-students-only)
-    -   [Exercise 4.3: Water vapor](#exercise-4.3-water-vapor)
+        only)](#exercise-42-co2-graduate-students-only)
+    -   [Exercise 4.3: Water vapor](#exercise-43-water-vapor)
 -   [Chapter 5 Exercise](#chapter-5-exercise)
-    -   [Exercise 5.2: Skin Height](#exercise-5.2-skin-height)
+    -   [Exercise 5.2: Skin Height](#exercise-52-skin-height)
 
 # Instructions
 
@@ -311,7 +311,7 @@ run_modtran(filename = file.path(data_dir, "modtran_baseline.txt"))
 modtran_baseline = read_modtran(file.path(data_dir, "modtran_baseline.txt"))
 ```
 
-Now you can extract the various values from modtran\_baseline:
+Now you can extract the various values from modtran_baseline:
 
 ``` r
 baseline_i_out <- modtran_baseline$i_out
@@ -545,9 +545,9 @@ ggplot(tbl, aes(x = x, y = y)) + geom_line() +
 
 ![](lab-03-instructions_files/figure-gfm/log_plot-1.png)<!-- -->
 
-# Exercises for Lab \#3
+# Exercises for Lab #3
 
-You should open the file `lab-03-exercises.Rmd` to do these exercises.
+You should open the file `lab-03-report.Rmd` to do these exercises.
 
 # Chapter 4 Exercises
 
@@ -609,6 +609,35 @@ doubling at a faster rate than CO<sub>2</sub>.
       plot(p) # you could also say print(p) here.
     }
     ```
+
+    This will take some time to run because it needs to run MODTRAN for
+    each different value of `ch4`, so you might want to tell R to save
+    the output from the model in a file, and tell R to check whether
+    that file exists and if it does, read from the file instead of
+    running the model again:
+
+    ``` r
+    for (ch4 in ch4_list) {
+      # make a name for the model-output file: "_data/modtran_ch4_0_ppm.txt",
+      # "_data/modtran_ch4_1.7_ppm.txt", etc.
+      mod_file = str_c("_data/modtran_ch4_", ch4, "_ppm.txt")
+      if (! file.exists(mod_file)) {
+        mod_data = run_modtran(filename = mod_file, co2_ppm = 0, ch4_ppm = ch4, 
+                               trop_o3_ppb = 0, strat_o3_scale = 0, 
+                               h2o_scale = 0, freon_scale = 0)
+      } else {
+        mod_data = read_modtran(mod_file)
+      }
+      p = plot_modtran(mod_data)
+      plot(p) # you could also say print(p) here.
+    }
+    ```
+
+    But if you do this, then if you change the way you run the model
+    (e.g., change some of the parameters to `run_modtran`, such as the
+    altitude or the atmosphere), you will need to manually delete the
+    files in the `_data` directory to make R run the model with the new
+    parameters.
 
 3.  **Would a doubling of methane have as great an impact on the heat
     balance as a doubling of CO<sub>2</sub>?**
