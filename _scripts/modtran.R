@@ -1,16 +1,24 @@
 library(pacman)
-p_load(tidyverse, scales, xml2)
+p_load(rprojroot, tidyverse, scales, xml2)
 
 ssource <- function(filename, chdir = F) {
   if(!file.exists(filename)) {
     if(exists("script_dir", envir = globalenv()))
       script_dir = get("script_dir", envir = globalenv())
-    else if (exists("script.dir", envir = globalenv()))
-      script_dir = get("script.dir", envir = globalenv())
+    else if (exists("script_dir", envir = globalenv()))
+      script_dir = get("script_dir", envir = globalenv())
     else if (dir.exists("_scripts"))
       script_dir = "_scripts"
-    else if (dir.exists(rprojroot::find_rstudio_root_file("_scripts")))
-      script_dir = ("_scripts")
+    else if (dir.exists(find_rstudio_root_file("_scripts")))
+      script_dir = find_rstudio_root_file("_scripts")
+    else if (dir.exists("scripts"))
+      script_dir = "scripts"
+    else if (dir.exists(find_rstudio_root_file("scripts")))
+      script_dir = find_rstudio_root_file("scripts")
+    else if (dir.exists(find_rstudio_root_file("lecture_scripts")))
+      script_dir = find_rstudio_root_file("lecture_scripts")
+    else if (dir.exists(find_rstudio_root_file("util_scripts")))
+      script_dir = find_rstudio_root_file("util_scripts")
     else
       script_dir = "."
     if(dir.exists(script_dir)) filename = file.path(script_dir, filename)
@@ -21,8 +29,6 @@ ssource <- function(filename, chdir = F) {
 
 if (! exists("tbr_earth")) ssource("utils.R", chdir = T)
 if (! exists("planck")) ssource("planck.R", chdir = T)
-
-
 
 model_params = tibble(
   key = c("co2_ppm",
@@ -158,11 +164,11 @@ run_modtran <- function(filename = NULL,
     simplify()
   for(k in c('h2o_fixed', 'atmosphere', 'clouds', 'looking')) {
     # message("Looking up ", k)
-    lookup = model_params %>% filter(key == k) %>% select(spec) %>% simplify()
+    lookup = model_params %>% dplyr::filter(key == k) %>% select(spec) %>% simplify()
     # message("Lookup = ", lookup)
     lookup = get(lookup, 1)
     # message("Lookup class = ", class(lookup), ", type = ", typeof(lookup), ", dim = ", dim(lookup))
-    values[k] = lookup %>% filter(key == values[k]) %>% select(value) %>% simplify()
+    values[k] = lookup %>% dplyr::filter(key == values[k]) %>% select(value) %>% simplify()
   }
   args <- tibble(key = names(values), value = values)
   params = model_params %>% inner_join(args, by = "key")
@@ -207,9 +213,11 @@ read_modtran_profile <- function(filename = NULL, text = NULL) {
     str_replace_all("([^a-zA-Z0-9_]+)", ".") %>%
     str_replace_all(c('^\\.' = '', '\\.$' = ''))
   dups <- duplicated(col_names) %>% which()
-  col_names[dups] <- col_names[dups] %>% str_c(seq_along(dups), sep = ".")
+  if (length(dups) > 0) {
+    col_names[dups] <- col_names[dups] %>% str_c(seq_along(dups), sep = ".")
+  }
   profile <- lines[start:end] %>% str_trim() %>% str_c(collapse = "\n") %>%
-    read_table2(col_names=col_names)
+    read_table(col_names=col_names)
   profile <- profile %>% select(Z, P, T, H2O, O3, CO2, CH4) %>%
     # convert from MBAR to ppmv
     mutate(H2O = H2O * 1E6 / P)
@@ -217,7 +225,7 @@ read_modtran_profile <- function(filename = NULL, text = NULL) {
 }
 
 extract_tropopause <- function(profile) {
-  profile %>% filter(T <= lead(T)) %>% top_n(-1, Z)
+  profile %>% dplyr::filter(T <= lead(T)) %>% top_n(-1, Z)
 }
 
 read_modtran <- function(filename = NULL, text = NULL, scale_factor = 3.14E+4) {
@@ -242,6 +250,16 @@ read_modtran <- function(filename = NULL, text = NULL, scale_factor = 3.14E+4) {
   profile <- read_modtran_profile(text = lines)
   tropopause <- extract_tropopause(profile)
   t_ground = profile$T[1]
+
+  boundary_line <- str_detect(lines, "^ *BOUNDARY TEMPERATURE") %>% which()
+  if (length(boundary_line) > 0) {
+    boundary_line <- boundary_line[[1]]
+    boundary_str <-lines[[boundary_line]]
+    boundary_temp <- str_replace(boundary_str,
+                                 "^[A-Za-z =]+ +([0-9.]+) *K *$",
+                                 "\\1") %>%
+      as.numeric()
+  }
 
   im <- str_detect(lines, "^0INTEGRATED RADIANCE") %>% which()
   target <- lines[im[1]]
@@ -270,6 +288,10 @@ read_modtran <- function(filename = NULL, text = NULL, scale_factor = 3.14E+4) {
     direction = NA
   }
   direction <- factor(direction, levels=c("up","down"))
+
+  if (direction == "down") {
+    t_ground = boundary_temp
+  }
 
   lx <- lines[-(1:(min(radiance_lines) + 2))]
   x <- str_detect(lx, "^   ")
@@ -302,7 +324,14 @@ plot_modtran <- function(filename = NULL, text = NULL,
                          annotate_size = 5, text_size = 10,
                          legend_text_size = 10, legend_size = 0.2,
                          line_scale = 1, direction = "out",
-                         lambda = NULL) {
+                         use_wavelength_scale = TRUE,
+                         lambda = NULL,
+                         color = TRUE,
+                         modtran_color = NA, modtran_linetype = NA,
+                         modtran_name = "MODTRAN",
+                         extra_levels = NULL,
+                         kmin = 100,
+                         kmax = 1500) {
   if (! is.null(modtran_data)) {
     x <- modtran_data
   } else if (! is.null(filename) && is.list(filename) &&
@@ -315,14 +344,14 @@ plot_modtran <- function(filename = NULL, text = NULL,
   alt <- x$alt
   co2 <- x$co2
   i_out <- x$i_out
-  k_limits <- c(100, 1500)
+  k_limits <- c(kmin, kmax)
 
   # if (! is.na(delta_t) && (delta_t %in% c(TRUE, 'auto'))) {
   #   delta_t = x$delta_t
   # }
 
   if (is.null(descr)) {
-    descr <- bquote(.(co2) * " ppm " * CO[2] * ", " * .(alt) * " km altitude")
+    descr <- bquote("MODTRAN: " * .(co2) * " ppm " * CO[2] * ", " * .(alt) * " km altitude")
   }
 
   if (! is.na(i_out_ref)) {
@@ -334,38 +363,98 @@ plot_modtran <- function(filename = NULL, text = NULL,
   dt <- (tmax - tmin) / (nc - 1)
   dh <- max_color / (nc - 1)
   tlist <- tmin + dt * seq(0,nc-1)
-  hues <- c(hsv(max_color - (dh * seq(0, nc - 1 )), 0.9, 0.8), "black")
 
   thermal <- data.frame(k = spectrum$k, t = tmin)
   thermal <- bind_rows(thermal, map(seq(tmin + dt, tmax, dt),
                                     ~tibble(k = spectrum$k, t = .x)))
-  thermal <- thermal %>%
-    mutate(tk = planck(k, as.numeric(as.character(t)),fudge_factor=1),
-           t = paste(t, "K") %>%
-             ordered(., levels = c("MODTRAN", sort(unique(.), decreasing = TRUE)))
-    ) %>% na.omit() %>% filter(between(k, k_limits[1], k_limits[2]))
-
-  if (is.null(lambda)) {
-    lambda = c(1, 2, 2.5, 3, 3.5, 4, 5:10, 12, 14, 17, 20, 25, 30, 35, 40, 50, 100)
+  thermal_levels <- thermal$t %>% unique() %>% na.omit() %>% str_c(' K')
+  if (!is.null(extra_levels)) {
+    thermal_levels = c(extra_levels$names, thermal_levels)
+  }
+  thermal_levels <- thermal_levels %>%
+    sort(decreasing = TRUE) %>% {c(modtran_name, .)}
+  thermal_labels <- thermal_levels
+  if (!is.null(modtran_name)) {
+    thermal_labels <- ifelse(thermal_labels == "MODTRAN",
+                             modtran_name, thermal_labels)
   }
 
+  thermal <- thermal %>%
+    mutate(tk = planck(k, as.numeric(as.character(t)),fudge_factor=1),
+           t = str_c(t, " K") %>%
+             ordered(., levels = thermal_levels,
+                     labels = thermal_labels)) %>%
+    na.omit() %>% dplyr::filter(between(k, k_limits[1], k_limits[2]))
+
+  if (is.null(lambda)) {
+    lambda = c(1, 2, 2.5, 3, 3.5, 4, 5:10,
+               12, 14, 17, 20, 25, 30, 35, 40, 50,
+               100)
+  }
+
+  if (is.na(modtran_color))
+    modtran_color = "black"
+  extra_colors = modtran_color
+  if (!is.null(extra_levels))
+    extra_colors = c(extra_colors, extra_levels$colors)
+
+  hues <- hsv(max_color - (dh * seq(0, nc - 1 )), 0.9, 0.8) %>%
+    c(extra_colors) %>%
+    set_names(rev(thermal_labels)) %>% rev()
+
+  message("colors = (", str_c(names(hues), hues, sep = " = ",
+                              collapse = ", "), ")")
+
+  if (is.na(modtran_linetype))
+    modtran_linetype = 'solid'
+  extra_linetypes = modtran_linetype
+  if (! is.null(extra_levels))
+    extra_linetypes = c(extra_levels$linetypes, extra_linetypes)
+
+  linetypes = linetype_pal()(1 + nc)[-1] %>% as.hexmode() %>% {. * 2} %>%
+    as.character.hexmode() %>% str_replace("^0+","")
+
+  linetypes = c(extra_linetypes, linetypes) %>%
+    set_names(thermal_labels)
+
+  message("linetypes = (", str_c(names(linetypes), linetypes, sep = " = ",
+                                 collapse = ", "), ")")
+
   spectrum <- spectrum %>% select(k, tk) %>% na.omit() %>%
-    filter(between(k, k_limits[1], k_limits[2]))
+    dplyr::filter(between(k, k_limits[1], k_limits[2]))
+
+  if (use_wavelength_scale) {
+    sec_axis <- sec_axis(~ ., breaks = 1E4 / lambda,
+                         labels = as.character(lambda),
+                         name = expression(paste("Wavelength ", (mu * m))))
+  } else {
+    sec_axis = waiver()
+  }
+
+  if (is.null(descr)) {
+    title = waiver()
+  } else {
+    title = descr
+  }
 
   p1 <- ggplot(spectrum, aes(x=k,y=tk)) +
-    geom_line(aes(color="MODTRAN"), size=I(line_scale)) +
+    geom_line(aes(color=!!modtran_name), size=I(line_scale)) +
     labs(x = expression(paste("Wavenumber (", cm^-1, ")")),
          y = expression(paste("Intensity (", W/m^2 * cm^-1, ")")),
-         title = bquote("MODTRAN: " * .(descr))
+         title = title
     ) +
-    scale_x_continuous(limits=k_limits,
-                       sec.axis = sec_axis(~ ., breaks = 1E4 / lambda,
-                                           labels = as.character(lambda),
-                                           name = expression(paste("Wavelength ", (mu * m)))))
+    scale_x_continuous(limits=k_limits, sec.axis = sec_axis)
 
-  p1 <- p1 + geom_line(aes(x=k,y=tk * 3.14E+2, color = t),
-                       data=thermal, size=I(0.5 * line_scale)) +
-    scale_color_manual(values=hues, breaks=levels(thermal$t), name=NULL)
+  if (color) {
+    p1 <- p1 + geom_line(aes(x=k,y=tk * 3.14E+2, color = t),
+                         data=thermal, size=I(0.5 * line_scale)) +
+      scale_color_manual(values = hues, breaks = levels(thermal$t), name=NULL)
+  } else {
+    p1 <- p1 + geom_line(aes(x=k,y=tk * 3.14E+2, linetype = t),
+                         data=thermal, size=I(0.5 * line_scale)) +
+      scale_linetype_manual(values = set_names(linetypes, levels(thermal$t)),
+                            breaks=levels(thermal$t), name=NULL)
+  }
 
   caption <- paste("I[", direction, "] == ",
                    formatC(i_out, digits=2, format="f"))
