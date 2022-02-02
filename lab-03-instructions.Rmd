@@ -5,11 +5,11 @@ date: 'Lab: Mon. Feb. 8. Due: Mon. Feb. 15'
 subtitle: Exercises with the MODTRAN Model
 fontsize: 12pt
 output:
-  github_document:
+  html_document:
     toc: true
   word_document:
     toc: true
-  html_document:
+  github_document:
     toc: true
   pdf_document: 
     toc: yes
@@ -587,7 +587,7 @@ level will lead to an increase in the outgoing IR energy flux at the top of the
 atmosphere.
 
 
-a) How much extra outgoing IR would you get by raising the temperature of the 
+a) **How much extra outgoing IR would you get by raising the temperature of the 
    ground by 5&deg;C? What effect does the ground temperature have on the 
    shape of the outgoing IR spectrum and why?**
    

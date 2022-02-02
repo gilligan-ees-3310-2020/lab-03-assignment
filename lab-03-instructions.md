@@ -669,9 +669,9 @@ Our theory of climate presumes that an increase in the temperature at
 ground level will lead to an increase in the outgoing IR energy flux at
 the top of the atmosphere.
 
-1.  How much extra outgoing IR would you get by raising the temperature
-    of the ground by 5°C? What effect does the ground temperature have
-    on the shape of the outgoing IR spectrum and why?\*\*
+1.  **How much extra outgoing IR would you get by raising the
+    temperature of the ground by 5°C? What effect does the ground
+    temperature have on the shape of the outgoing IR spectrum and why?**
 
     **HINT**: You can raise the temperature of the ground with the
     `delta_t` artument to MODTRAN.

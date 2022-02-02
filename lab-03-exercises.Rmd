@@ -227,7 +227,7 @@ level will lead to an increase in the outgoing IR energy flux at the top of the
 atmosphere.
 
 
-a) How much extra outgoing IR would you get by raising the temperature of the 
+a) **How much extra outgoing IR would you get by raising the temperature of the 
    ground by 5&deg;C? What effect does the ground temperature have on the 
    shape of the outgoing IR spectrum and why?**
    
