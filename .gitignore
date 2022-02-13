@@ -53,6 +53,9 @@ README.pdf
 ~*.xls*
 *~
 
+# Corel Auto-Preserve
+Corel Auto-Preserve/
+
 # Solution/Answer files for lab projects
 lab-*-solution.*
 lab-*-answer*.*
