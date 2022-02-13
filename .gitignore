@@ -59,3 +59,7 @@ Corel Auto-Preserve/
 # Solution/Answer files for lab projects
 lab-*-solution.*
 lab-*-answer*.*
+
+# Temporary admin directory
+/scratch/
+
