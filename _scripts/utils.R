@@ -1,7 +1,8 @@
 #
 #  EES 3310 Lab Utility Scripts
 #
-library(stringr)
+library(tiyverse)
+library(lubridate)
 
 sb_const <- 5.6704E-8
 sigma_sb <- sb_const
